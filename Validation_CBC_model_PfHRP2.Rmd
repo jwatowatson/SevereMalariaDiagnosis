@@ -32,7 +32,7 @@ thresh_lowSM = 0.2
 ```
 
 ```{r}
-dat_all=read.csv( file = '../Diagnostic_Model_Severe_Malaria/dataset.csv')
+dat_all=read.csv( file = 'dataset.csv')
 
 writeLines(sprintf('The dataset contains %s patients with measured PfHRP2 and measured platelet counts from %s studies',
                    nrow(dat_all),
