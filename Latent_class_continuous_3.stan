@@ -36,15 +36,11 @@ model {
       int k = site[n];
       vector[3] ps;
       // loop over each sub-distribution in the mixture
-      for(i in 1:2){
+      for(i in 1:3){
          ps[i]=log(theta[k][i]);
          for(t in 1:Ntest){
-            ps[i] += student_t_lpdf(y[n][t] | 7, mu[t][cluster[t,i]], sigma[t][cluster[t,i]]);
+            ps[i] += normal_lpdf(y[n][t] | mu[t][cluster[t,i]], sigma[t][cluster[t,i]]);
          }
-      }
-      ps[3]=log(theta[k][3]);
-      for(t in 1:Ntest){
-         ps[3] += student_t_lpdf(y[n][t] | 7, mu[t][cluster[t,3]], sigma[t][cluster[t,3]]);
       }
       target += log_sum_exp(ps);
    }
@@ -57,15 +53,11 @@ generated quantities {
    // This computes respective densities of each mixture component
    for(n in 1:N){
       int k = site[n];
-      for(i in 1:2){
+      for(i in 1:3){
          ps_comp[n][i]=theta[k][i];
          for(t in 1:Ntest){
-            ps_comp[n][i] *= exp(student_t_lpdf(y[n][t] | 7, mu[t][cluster[t,i]], sigma[t][cluster[t,i]]));
+            ps_comp[n][i] *= exp(normal_lpdf(y[n][t] | mu[t][cluster[t,i]], sigma[t][cluster[t,i]]));
          }
-      }
-      ps_comp[n][3]=theta[k][3];
-      for(t in 1:Ntest){
-         ps_comp[n][3] *= exp(student_t_lpdf(y[n][t] | 7, mu[t][cluster[t,3]], sigma[t][cluster[t,3]]));
       }
       // normalise to get P_SM
       ps_comp[n] = ps_comp[n]/sum(ps_comp[n]);

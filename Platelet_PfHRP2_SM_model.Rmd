@@ -1,0 +1,1020 @@
+---
+title: "Platelet count and plasma PfHRP2 concentration to diagnose severe malaria"
+author: "James Watson"
+date: "5/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE, cache.comments = FALSE,
+                      echo = TRUE, include = TRUE, 
+                      fig.width = 8, fig.height = 8,
+                      fig.pos = 'H',dev = 'png', dpi = 300)
+```
+
+
+```{r load_data_packages}
+library(RColorBrewer)
+library(mgcv)
+library(lme4)
+library(mclust)
+library(rstan)
+library(gtools)
+library(dplyr)
+library(reshape2)
+
+
+options(mc.cores = parallel::detectCores())
+
+RUN_STAN=F
+source('functions.R')
+
+thresh_highSM = 0.8
+thresh_lowSM = 0.2
+```
+
+```{r}
+dat_all=read.csv( file = 'dataset.csv')
+
+writeLines(sprintf('The dataset contains %s patients with measured PfHRP2 and measured platelet counts from %s studies',
+                   nrow(dat_all),
+                   length(unique(dat_all$study))))
+African_studies = c('Kilifi (Kenya)',
+                    'Kampala (Uganda)',
+                    'FEAST (Uganda)')
+writeLines('Patients per study:')
+print(table(dat_all$study))
+dat_all$study_col = brewer.pal(n = 8, name = 'Dark2')[c(3,4,5,7)][as.numeric(as.factor(dat_all$study))]
+mycols = adjustcolor(brewer.pal(n = 10, 'Paired')[c(2,4,6,10)], 
+                     alpha.f = .7)
+```
+
+
+Some data cleaning
+```{r}
+hist(dat_all$hct, breaks = 50)
+# get rid of outlier HCT values
+ind = which(dat_all$hct <3 | dat_all$hct>50)
+dat_all$hct[ind] = NA
+table(!is.na(dat_all$hct))
+
+
+## PfHRP2 deletions - samples with positive parasite count by negative on the elisa
+ind = which(dat_all$hrp2==0 & dat_all$para > 1000)
+table(dat_all$study[ind])
+writeLines(sprintf('A total of %s samples have zero PfHRP2 but more than 1000 parasites per uL',length(ind)))
+dat_all = dat_all[-ind, ]
+
+writeLines(sprintf('After excluding the HRP2 outliers, the dataset contains %s patients with measured PfHRP2 and measured platelet counts',
+                   nrow(dat_all)))
+```
+
+## Overview of patient characteristics
+
+Results for Table 1
+```{r}
+table(dat_all$study)
+
+xx=aggregate(age ~ study, dat_all, quantile, probs=c(0.25,.5,.75))
+colnames(xx$age)=c('lower','median','upper')
+xx$age = round(xx$age,1)
+print(xx)
+
+aggregate(hrp2 ~ study, dat_all, length)
+aggregate(outcome ~ study, dat_all, function(x) round(100*mean(x),1))
+aggregate(platelet ~ study, dat_all, quantile, probs=c(0.25,.5,.75))
+aggregate(hrp2 ~ study, dat_all, quantile, probs=c(0.25,.5,.75))
+aggregate(wbc ~ study, dat_all, quantile, probs=c(0.25,.5,.75))
+ind_pos = which(dat_all$malaria_positive==1)
+dat_all$log10_parasites = log10(dat_all$para+50)
+xx=aggregate(para ~ study, dat_all[ind_pos, ], 
+             quantile, probs=c(0.25,.5,.75))
+xx$para = round(xx$para)
+print(xx)
+
+table(dat_all$study, dat_all$sickle)
+
+
+# xx = aggregate(log10_parasites ~ study, dat_all[ind_pos, ], mean)
+# xx[,2] = round(10^xx[,2])
+# print(xx)
+```
+
+
+
+Correlation between the two biomarkers
+```{r}
+writeLines('African sites: correlation:')
+ind_Africa = dat_all$study %in% African_studies
+res=cor.test(log10(dat_all$platelet[ind_Africa]),
+             log10(dat_all$hrp2+1)[ind_Africa])
+res
+log10(res$p.value)
+round(res$estimate,2)
+
+writeLines('Bangladesh: correlation:')
+res=cor.test(log10(dat_all$platelet[!ind_Africa]),
+             log10(dat_all$hrp2+1)[!ind_Africa])
+res
+log10(res$p.value)
+round(res$estimate,2)
+```
+
+Summary plot of the biomarker data
+```{r platelet_hrp2_data}
+mycols = rep('black',4)
+dat_all$log10_platelet=log10(dat_all$platelet)
+ind = which(dat_all$hrp2==0)
+dat_all$hrp2[ind] = 10^rnorm(length(ind),0,.1)
+dat_all$log10_hrp2 = log10(dat_all$hrp2)
+par(las=1, family='serif', mfrow=c(2,2),cex.lab=1.5, cex.axis=1.5)
+for(cc in unique(dat_all$study)){
+  plot(dat_all$log10_platelet,dat_all$log10_hrp2, 
+       panel.first = grid(), xaxt='n', yaxt='n',
+       xlab='Platelet count (x1000 per uL)',type='n',
+       ylab='PfHRP2 (ng/mL)')
+  ind = dat_all$study==cc
+  title(paste(cc, ' (n=',sum(ind),')',sep = ''))
+  points(dat_all$log10_platelet[ind],
+         dat_all$log10_hrp2[ind], pch = 16, 
+         col= adjustcolor(dat_all$study_col,.1)[ind])
+  points(dat_all$log10_platelet[ind],
+         dat_all$log10_hrp2[ind], pch = 1, 
+         col= adjustcolor(dat_all$study_col,.5)[ind])
+  axis(1, at = log10(c(10, 20,100,1000)),
+       labels = c(10, 20,100,1000))
+  axis(1, at = log10(seq(20, 90, by =10)), labels = NA)
+  axis(1, at = log10(seq(200, 900, by =100)), labels = NA)
+  axis(2, at = 0:5, 
+       labels = c(1, 10, expression(10^2),expression(10^3), 
+                  expression(10^4),expression(10^5)))
+}
+```
+
+## Fitting a mixture model to platelets and HRP2
+### Two component mixture - not including FEAST
+
+Analysis not including the FEAST study - only severe malaria studies
+```{r setup_stan_model}
+# make numeric matrix for stan input
+ind_SMstudies = dat_all$study != 'FEAST (Uganda)' &
+  !is.na(dat_all$log10_parasites)
+X = dat_all[ind_SMstudies,
+            c('log10_platelet',
+              'log10_hrp2',
+              'log10_parasites')]
+site_index_SMstudies = as.numeric(as.factor(dat_all$study[ind_SMstudies]))
+table(site_index_SMstudies)
+
+stan_dat_all = 
+  list(N = nrow(X),
+       y = X,
+       Ntest = ncol(X),
+       K_sites = max(site_index_SMstudies),
+       site = site_index_SMstudies,
+       prior_mu = matrix(c(log10(75), log10(200),
+                           log10(250),log10(3000),
+                           3,5),
+                         nrow = ncol(X), byrow = T),
+       prior_sigma_mu = matrix(c(0.1, 0.1,
+                                 0.2, 0.2,
+                                 0.25, 0.25),
+                               nrow = ncol(X), byrow = T),
+       beta_prior_prev = matrix(data = c(19,1,
+                                         14,7,
+                                         14,7),
+                                nrow = max(site_index_SMstudies),
+                                byrow = T),
+       cluster = matrix(data = c(1,2,
+                                 2,1,
+                                 2,1), 
+                        nrow = ncol(X), byrow = T))
+
+print(stan_dat_all$N)
+# just platelets and HRP2 (reference)
+ind_SMstudies2 = dat_all$study != 'FEAST (Uganda)' 
+X = dat_all[ind_SMstudies2,c('log10_platelet','log10_hrp2')]
+
+stan_dat_plt_hrp2 = stan_dat_all
+stan_dat_plt_hrp2$y = X
+stan_dat_plt_hrp2$N = nrow(X)
+stan_dat_plt_hrp2$site = as.numeric(as.factor(dat_all$study[ind_SMstudies2]))
+stan_dat_plt_hrp2$Ntest = 2
+stan_dat_plt_hrp2$prior_mu = stan_dat_all$prior_mu[1:2,]
+stan_dat_plt_hrp2$prior_sigma_mu = stan_dat_all$prior_sigma_mu[1:2,]
+stan_dat_plt_hrp2$cluster = stan_dat_all$cluster[1:2,]
+```
+
+```{r compile_stan_model2}
+# compile stan model
+lc_mod = stan_model(file = 'Latent_class_continuous_2.stan')
+```
+
+
+
+```{r run_stan_models2}
+fname_all = paste0('Rout/', 'mod2_LC_all.stanfit')
+if(RUN_STAN | !file.exists(fname_all)){
+  out_all = sampling(lc_mod, data=stan_dat_all, thin=4)
+  save(out_all, file = fname_all)
+} else {
+  load(fname_all)
+}
+
+fname_plt_hrp2 = paste0('Rout/', 'mod2_LC_plt_hrp2.stanfit')
+if(RUN_STAN | !file.exists(fname_plt_hrp2)){
+  out_plt_hrp2 = sampling(lc_mod, data=stan_dat_plt_hrp2, thin=4)
+  save(out_plt_hrp2, file = fname_plt_hrp2)
+} else {
+  load(fname_plt_hrp2)
+}
+
+traceplot(out_all,par=c('prev','mu','sigma'))
+traceplot(out_plt_hrp2,par=c('prev','mu','sigma'))
+
+thetas_all = extract(out_all)
+thetas_plt_hrp2 = extract(out_plt_hrp2)
+
+round(100*colMeans(thetas_all$prev))
+round(100*colMeans(thetas_plt_hrp2$prev))
+
+mean_vals = round(10^apply(thetas_all$mu, 2:3, mean))
+colnames(mean_vals) = c('SM', 'not SM')
+rownames(mean_vals) = c('Platelet count','PfHRP2','Parasite count')
+print(mean_vals)
+
+mean_vals2 = round(10^apply(thetas_plt_hrp2$mu, 2:3, mean))
+colnames(mean_vals2) = c('SM', 'not SM')
+rownames(mean_vals2) = c('Platelet count','PfHRP2')
+print(mean_vals2)
+
+
+hist(colMeans(thetas_all$ps_SM),breaks = 20)
+ind_SM = colMeans(thetas_all$ps_SM)>thresh_highSM
+ind_notSM = colMeans(thetas_all$ps_SM)<thresh_lowSM
+sum(ind_SM)
+sum(ind_notSM)
+
+cor.test(stan_dat_all$y[ind_SM, 1],stan_dat_all$y[ind_SM,2])
+cor.test(stan_dat_all$y[ind_SM, 2],stan_dat_all$y[ind_SM,3])
+
+cor.test(stan_dat_all$y[ind_notSM, 1],stan_dat_all$y[ind_notSM,2])
+cor.test(stan_dat_all$y[ind_notSM, 2],stan_dat_all$y[ind_notSM,3])
+
+
+round(10^apply(thetas_plt_hrp2$mu, 2:3, mean))
+
+round(10^(apply(thetas_plt_hrp2$mu, 2:3, mean)+ 1.96*apply(thetas_plt_hrp2$sigma, 2:3, mean)))
+
+round(10^(apply(thetas_plt_hrp2$mu, 2:3, mean)- 1.96*apply(thetas_plt_hrp2$sigma, 2:3, mean)))
+```
+
+
+```{r conditional_indep_mod2}
+par(mfrow=c(2,2), las=1)
+plot(stan_dat_all$y[ind_SM, 1],stan_dat_all$y[ind_SM,2],
+     xlab='Platelet count',ylab='HRP2',main='True SM',
+     xlim=range(stan_dat_all$y[,1]),ylim=range(stan_dat_all$y[,2]),
+     col=dat_all$study_col[ind_SM],panel.first=grid())
+legend('bottomright',col = unique(dat_all$study_col), 
+       legend = unique(dat_all$study),pch=1,inset=0.03)
+plot(stan_dat_all$y[ind_SM, 2],stan_dat_all$y[ind_SM,3],
+     xlab='HRP2', xlim=range(stan_dat_all$y[,2]),
+     ylim=range(stan_dat_all$y[,3]),
+     ylab='Parasite density',main='True SM',
+     col=dat_all$study_col[ind_SM],panel.first=grid())
+plot(stan_dat_all$y[ind_notSM, 1],stan_dat_all$y[ind_notSM,2],
+     xlab='Platelet count',ylab='HRP2',main='Not SM',
+     xlim=range(stan_dat_all$y[,1]),ylim=range(stan_dat_all$y[,2]),
+     col=dat_all$study_col[ind_notSM],panel.first=grid())
+plot(stan_dat_all$y[ind_notSM, 2],stan_dat_all$y[ind_notSM,3],
+     xlim=range(stan_dat_all$y[,2]),ylim=range(stan_dat_all$y[,3]),
+     xlab='HRP2',ylab='Parasite density',main='Not SM',
+     col=dat_all$study_col[ind_notSM],panel.first=grid())
+```
+
+
+### Sensitivity analysis - only African studies
+
+Just use the two severe malaria studies from Africa
+```{r setup_stan_model_sensitivityanalysis}
+# make numeric matrix for stan input
+ind_SMAfrica = dat_all$study != 'FEAST (Uganda)' &
+  dat_all$study != 'Bangladesh' &
+  !is.na(dat_all$log10_parasites)
+X = dat_all[ind_SMAfrica,
+            c('log10_platelet','log10_hrp2',
+              'log10_parasites')]
+site_index_SMAfrica = as.numeric(as.factor(dat_all$study[ind_SMAfrica]))
+table(site_index_SMAfrica)
+
+stan_dat_all_Af = 
+  list(N = nrow(X),
+       y = X,
+       Ntest = ncol(X),
+       K_sites = max(site_index_SMAfrica),
+       site = site_index_SMAfrica,
+       prior_mu = matrix(c(log10(75), log10(200),
+                           log10(250),log10(3000),
+                           3,5),
+                         nrow = ncol(X), byrow = T),
+       prior_sigma_mu = matrix(c(0.1, 0.1,
+                                 0.1, 0.1,
+                                 0.2, 0.2),
+                               nrow = ncol(X), byrow = T),
+       beta_prior_prev = matrix(data = c(14,7,
+                                         14,7),
+                                nrow = max(site_index_SMAfrica),
+                                byrow = T),
+       cluster = matrix(data = c(1,2,
+                                 2,1,
+                                 2,1), 
+                        nrow = ncol(X), byrow = T))
+
+# just platelets and HRP2 (reference)
+stan_dat_plt_hrp2_Af = stan_dat_all_Af
+stan_dat_plt_hrp2_Af$y = X[,1:2]
+stan_dat_plt_hrp2_Af$Ntest = 2
+stan_dat_plt_hrp2_Af$prior_mu = stan_dat_all_Af$prior_mu[1:2,]
+stan_dat_plt_hrp2_Af$prior_sigma_mu =stan_dat_all_Af$prior_sigma_mu[1:2,]
+stan_dat_plt_hrp2_Af$cluster = stan_dat_all_Af$cluster[1:2,]
+```
+
+
+```{r fit_stan_model_sensitivityanalysis}
+fname_all_Af = paste0('Rout/', 'mod2_LC_all_Af.stanfit')
+if(RUN_STAN | !file.exists(fname_all_Af)){
+  out_all_Af = sampling(lc_mod, data=stan_dat_all_Af, thin=4)
+  save(out_all_Af, file = fname_all_Af)
+} else {
+  load(fname_all_Af)
+}
+
+fname_plt_hrp2 = paste0('Rout/', 'mod2_LC_plt_hrp2_Af.stanfit')
+if(RUN_STAN | !file.exists(fname_plt_hrp2)){
+  out_plt_hrp2_Af = sampling(lc_mod, data=stan_dat_plt_hrp2_Af, thin=4)
+  save(out_plt_hrp2_Af, file = fname_plt_hrp2)
+} else {
+  load(fname_plt_hrp2)
+}
+
+traceplot(out_all_Af)
+traceplot(out_plt_hrp2_Af)
+
+thetas_all_Af = extract(out_all_Af)
+thetas_plt_hrp2_Af = extract(out_plt_hrp2_Af)
+
+round(100*colMeans(thetas_all_Af$prev))
+round(100*colMeans(thetas_plt_hrp2_Af$prev))
+
+mean_vals = round(10^apply(thetas_all_Af$mu, 2:3, mean))
+colnames(mean_vals) = c('SM', 'not SM')
+rownames(mean_vals) = c('Platelet count','PfHRP2','Parasite count')
+print(mean_vals)
+
+mean_vals2 = round(10^apply(thetas_plt_hrp2_Af$mu, 2:3, mean))
+colnames(mean_vals2) = c('SM', 'not SM')
+rownames(mean_vals2) = c('Platelet count','PfHRP2')
+print(mean_vals2)
+```
+
+
+#### ROC curves
+
+
+```{r roc_curves_mod2}
+par(mfcol=c(2,2),las=1,cex.lab=1.3,cex.axis=1.3,family='serif')
+roc_analysis(thetas = thetas_all, stan_dat = stan_dat_all,
+             xvals = matrix(c(log10(10),log10(1000),
+                              1,5,1,6.5),
+                            nrow = 3,byrow = T),
+             xnames = c('Platelet count (x1000 per uL)',
+                        'PfHRP2 (ng/mL)',
+                        'Parasite count (per uL)'),
+             cutofftype = c('upper','lower','lower'),
+             mycuts = log10(c(150, 1000, 10000)))
+
+# sensitivity analysis using African studies only
+writeLines('Model using only African studies')
+roc_analysis(thetas = thetas_all_Af,
+             stan_dat = stan_dat_all_Af,
+             xvals = matrix(c(log10(10),log10(300),
+                              1,5,1,6.3),
+                            nrow = 3,byrow = T),
+             xnames = c('Platelet count (x1000 per uL)',
+                        'PfHRP2 (ng/mL)',
+                        'Parasite count (per uL)'),
+             cutofftype = c('upper','lower','lower'),
+             mycuts = log10(c(150, 1000, 10000)))
+
+writeLines('Model using only platelets and HRP2')
+par(mfcol=c(2,2),las=1,cex.lab=1.3,cex.axis=1.3,family='serif')
+roc_analysis(thetas = thetas_plt_hrp2, stan_dat = stan_dat_plt_hrp2,
+             xvals = matrix(c(log10(10),log10(1000),1,5),
+                            nrow = 2,byrow = T),
+             xnames = c('Platelet count (x1000 per uL)',
+                        'PfHRP2 (ng/mL)'),
+             cutofftype = c('upper','lower'))
+```
+
+
+### Three component mixture model
+
+```{r compile_stan_model3}
+lc3_mod = stan_model(file = 'Latent_class_continuous_3.stan')
+```
+
+This does not fit when we add parasite counts. So we are only using two biomarkers
+
+```{r run_stan_model3}
+# make numeric matrix for stan input
+X = dat_all[, c('log10_platelet','log10_hrp2')]
+site_index = as.numeric(as.factor(dat_all$study))
+table(site_index, dat_all$study)
+
+stan_dat = 
+  list(N = nrow(X),
+       y = X,
+       Ntest = ncol(X),
+       K_sites = max(site_index),
+       site = site_index,
+       prior_mu = matrix(c(log10(75), log10(200),log10(300),
+                           log10(2),log10(250),log10(3000)),
+                         nrow = ncol(X),ncol = 3, byrow = T),
+       prior_sigma_mu = matrix(c(0.1, 0.1, 0.1,
+                                 0.1, 0.1, 0.1),
+                               nrow = ncol(X), ncol = 3, byrow = T),
+       alpha_prior = matrix(data = c(19, 1, .1,
+                                     3,  3, 3,
+                                     14, 7, 1,
+                                     14, 7, 1),
+                            nrow = max(site_index),
+                            byrow = T),
+       cluster = matrix(data = c(1,2,3,
+                                 3,2,1), 
+                        nrow = ncol(X), ncol = 3, byrow = T))
+
+fname_final = paste0('Rout/', 'mod3_LC_final.stanfit')
+if(RUN_STAN | !file.exists(fname_final)){
+  out_final = sampling(lc3_mod, data = stan_dat, iter=2000,thin=4)
+  save(out_final, file = fname_final)
+} else {
+  load(fname_final)
+}
+
+traceplot(out_final, par=c('theta'))
+thetas_final = extract(out_final)
+
+writeLines('Estimated prevalences across the 4 studies:\n')
+round(100*apply(thetas_final$theta[, ,1], 2, 
+                quantile, probs=c(.025, 0.5, 0.975)),1)
+
+c_mean=round(10^apply(thetas_final$mu, 2:3, mean))
+
+c_upper=round(10^(apply(thetas_final$mu, 2:3, mean)+ 1.96*apply(thetas_final$sigma, 2:3, mean)))
+
+c_lower=round(10^(apply(thetas_final$mu, 2:3, mean)- 1.96*apply(thetas_final$sigma, 2:3, mean)))
+
+writeLines(sprintf('In SM the 95%% pred interval for the platelet count is %s to %s with a mean of %s',c_lower[1,1],c_upper[1,1],c_mean[1,1] ))
+
+writeLines(sprintf('In SM the 95%% pred interval for the PfHRP2 concentration is %s to %s with a mean of %s',c_lower[2,3],c_upper[2,3],c_mean[2,3] ))
+
+ind_not_FEAST = stan_dat$site != 2
+plot(colMeans(thetas_final$ps_SM)[ind_not_FEAST],
+     colMeans(thetas_plt_hrp2$ps_SM))
+lines(0:1, 0:1)
+```
+
+Check conditional independence
+```{r conditional_indep_mod3}
+ps = apply(thetas_final$ps_comp, 2:3, mean)
+ind_SM = ps[,1]>0.5; sum(ind_SM)
+ind_1 = ps[,2]>0.5; sum(ind_1)
+ind_2 = ps[,3]>0.5; sum(ind_2)
+
+par(mfrow=c(2,2), las=1)
+plot(stan_dat$y[ind_SM, 1],stan_dat$y[ind_SM,2],
+     xlab='Platelet count (x1000 per uL)',
+     ylab='PfHRP2 (ng/mL)',main='Severe malaria',
+     xlim=range(stan_dat$y[,1]),ylim=range(stan_dat$y[,2]),
+     col = dat_all$study_col[ind_SM],panel.first=grid())
+cor.test(stan_dat$y[ind_SM, 1],stan_dat$y[ind_SM,2])
+legend('bottomright',col = unique(dat_all$study_col), 
+       legend = unique(dat_all$study),pch=1,inset=0.03)
+
+plot(stan_dat$y[ind_1, 1],stan_dat$y[ind_1,2],
+     xlab='Platelet count (x1000 per uL)',
+     ylab='PfHRP2 (ng/mL)',main='Not severe malaria (component 1)',
+     xlim=range(stan_dat$y[,1]),ylim=range(stan_dat$y[,2]),
+     col = dat_all$study_col[ind_1],panel.first=grid())
+cor.test(stan_dat$y[ind_1, 1],stan_dat$y[ind_1,2])
+
+plot(stan_dat$y[ind_2, 1],stan_dat$y[ind_2,2],
+     xlab='Platelet count (x1000 per uL)',
+     ylab='PfHRP2 (ng/mL)',main='Not severe malaria (component 2)',
+     xlim=range(stan_dat$y[,1]),ylim=range(stan_dat$y[,2]),
+     col = dat_all$study_col[ind_2],panel.first=grid())
+cor.test(stan_dat$y[ind_2, 1],stan_dat$y[ind_2,2])
+```
+
+
+ROC curves
+```{r roc_curves_mod3}
+par(mfcol=c(2,2),las=1,cex.lab=1.3,cex.axis=1.3,family='serif')
+roc_analysis(thetas = thetas_final, stan_dat = stan_dat,
+             xvals = matrix(c(log10(10),log10(1000),1,5),
+                            nrow = 2,byrow = T),
+             xnames = c('Platelet count (x1000 per uL)',
+                        'PfHRP2 (ng/mL)'),
+             cutofftype = c('upper','lower'))
+```
+
+Make a P(SM) variable for subsequent analysis (continuous) and a discrete classification based on a cutoff of 0.5
+```{r}
+dat_all$P_SM = colMeans(thetas_final$ps_SM)
+dat_all$SM = as.numeric(dat_all$P_SM>0.5)
+hist(dat_all$P_SM, breaks = 20,main='Final model', xlab='P(SM)')
+```
+
+
+
+## Subsequent analysis
+
+Relationship with the two main subphenotypes, cerebral malaria and severe malaria anaemia
+```{r}
+writeLines('False diagnosis rate by coma status and by study:')
+print(aggregate(SM ~ coma + study, data = dat_all, mean))
+
+writeLines('True diagnosis rate by severe anaemia status (<15% haematocrit) and by study:')
+dat_all$SMA = as.numeric(dat_all$hct<=15)
+print(aggregate(SM ~ SMA + study, data = dat_all,mean))
+```
+
+
+
+```{r SM_group_classifications}
+par(las = 1, family='serif',mfrow=c(2,2), cex.lab=1.3,
+    cex.axis=1.3)
+n_levels = 11
+f=colorRampPalette(colors = RColorBrewer::brewer.pal(name = 'RdYlBu',n = n_levels))
+mycuts = cut(x = dat_all$P_SM, breaks = seq(0,1,by=1/n_levels))
+cols_ind = as.numeric(mycuts)
+mycols = f(n_levels)
+
+for(cc in unique(dat_all$study)){
+  ind = dat_all$study==cc
+  plot(X, type='n',
+       panel.first=grid(), 
+       xlab='Platelet count (x1000 per uL)', 
+       ylab='PfHRP2 (ng/mL)', xaxt='n', yaxt='n')
+  points(X[ind, ],  pch=1,
+         col= adjustcolor(mycols[cols_ind],.7)[ind])
+  points(X[ind, ],  pch=16,
+         col= adjustcolor(mycols[cols_ind],.4)[ind])
+  if(cc %in% African_studies){
+    ind_AS = dat_all$sickle==2
+    points(X[ind&ind_AS, ],pch=2)
+    ind_SS = dat_all$sickle==3
+    points(X[ind&ind_SS, ],pch=3)
+  }
+  title(cc)
+  axis(1, at = log10(c(10, 20,100,200,1000)),
+       labels = c(10, 20,100,200,1000))
+  axis(1, at = log10(seq(20, 100, by =10)), 
+       labels = NA)
+  axis(1, at = log10(seq(200, 1000, by =100)), 
+       labels = NA)
+  axis(2, at = 0:5, 
+       labels = c(1, 10, 
+                  expression(10^2),
+                  expression(10^3), 
+                  expression(10^4),
+                  expression(10^5)))
+  
+}
+table(sickle=dat_all$sickle, 
+      class=dat_all$SM, 
+      study=dat_all$study)
+
+lgd_ = rep(NA, n_levels)
+lgd_[c(1,6,11)] = c(1,0.5,0)
+legend('bottomleft',
+       legend = lgd_,
+       fill = rev(mycols),bty='n',x.intersp =.5,
+       border = NA,inset = 0.01,
+       y.intersp = 0.5,title = '',
+       cex = 1, text.font = 1)
+
+legend('bottomright',pch=2:3, legend = c('HbAS','HbSS'),inset=0.03)
+```
+
+
+```{r parasite_densities}
+### Parasite counts
+ind_neg = dat_all$malaria_positive
+par(las = 1, family='serif',mfrow=c(2,2), cex.lab=1.3, cex.axis=1.3)
+for(cc in unique(dat_all$study)){
+  ind = dat_all$study==cc
+  set.seed(7475)
+  myxs=dat_all$P_SM[ind]
+  myys=log10(dat_all$para+10^1.7)[ind]
+  plot(myxs,myys, panel.first=grid(), ylim =c(1.5,6.5),
+       pch=1, xlim=c(0,1),
+       col = adjustcolor('black',.4),
+       xlab='Prob(Severe Malaria)', 
+       ylab='Parasite density per uL',yaxt='n')
+  points(myxs,myys,pch=16,col = adjustcolor('black',.1))
+  # axis(1, at=1:3,labels = c('A','B','C'), tick = F)
+  axis(2, at = 2:6, 
+       labels = c(expression(10^2),
+                  expression(10^3), 
+                  expression(10^4),
+                  expression(10^5),
+                  expression(10^6)))
+  mod=gam(myys ~ s(myxs,k=3),
+          data=data.frame(myys=myys,myxs=myxs))
+  pxs=seq(0,1,length.out = 100)
+  lines(pxs,predict(mod, data.frame(myxs=pxs)),lwd=3)
+  title(cc)
+}
+```
+
+
+
+## Haematocrit
+
+
+```{r haematocrits}
+par(las = 1, family='serif',mfrow=c(2,2), cex.lab=1.3, cex.axis=1.3)
+for(cc in unique(dat_all$study)){
+  ind = dat_all$study==cc
+  set.seed(7475)
+  myxs=(dat_all$P_SM)[ind]
+  myys=jitter(dat_all$hct[ind], amount = .1)
+  plot(myxs,myys,panel.first=grid(), 
+       ylim = range(dat_all$hct,na.rm = T),
+       pch=1, xlim=c(0,1),
+       col = adjustcolor('black',.4),
+       xlab='Prob(Severe Malaria)',
+       ylab='Haematocrit (%)')
+  points(myxs,myys,pch=16,col = adjustcolor('black',.1))
+  mod=gam(myys ~ s(myxs,k=3),
+          data=data.frame(myys=myys,myxs=myxs))
+  pxs=seq(0,1,length.out = 100)
+  lines(pxs,predict(mod, data.frame(myxs=pxs)),lwd=3)
+  title(cc)
+}
+hct_subgroups = aggregate(hct ~ SM + study, 
+                          dat_all, median)
+print(hct_subgroups)
+
+# Severe anaemia
+SA_subgroups = aggregate(hct ~ SM + study, 
+                         dat_all, function(x) round(100*mean(x<15),1))
+print(SA_subgroups)
+
+ind_SM = dat_all$P_SM > thresh_highSM
+ind_notSM = dat_all$P_SM < thresh_lowSM
+par(mfcol=c(2,3))
+for(cc in c("FEAST (Uganda)","Kampala (Uganda)", "Kilifi (Kenya)")){
+  ind = dat_all$study==cc
+  
+  hist(dat_all$hct[ind_SM&ind], breaks = seq(0,50, by=1),
+       xlab='Haematocrit (%)', ylab='Number of patients',
+       main = paste0(cc,': ', 'P(SM)>0.8'),
+       panel.first=grid())
+  abline(v=median(dat_all$hct[ind_SM&ind],na.rm=T),lwd=2, col='red')
+  print(median(dat_all$hct[ind_SM&ind],na.rm=T))
+  hist(dat_all$hct[ind_notSM&ind], breaks = seq(0,50, by=1),
+       xlab='Haematocrit (%)', ylab='Number of patients',
+       main = paste0(cc,': ', 'P(SM)<0.2'),
+       panel.first=grid())
+  abline(v=median(dat_all$hct[ind_notSM&ind],na.rm=T),lwd=2, col='red')
+  print(median(dat_all$hct[ind_notSM&ind],na.rm=T))
+}
+
+```
+
+
+
+P(Severe malaria) and mortality
+```{r mortality}
+par(las = 1, family='serif',mfrow=c(2,2), cex.lab=1.3, cex.axis=1.3)
+for(cc in unique(dat_all$study)){
+  ind = dat_all$study==cc
+  set.seed(7475)
+  xs = seq(0,1,length.out = 100)
+  mod=glm(outcome ~ P_SM, family='binomial', data = dat_all[ind, ])
+  print(summary(mod))
+  preds=predict(mod,newdata = data.frame(P_SM=xs),se.fit = T)
+  plot(xs,100*inv.logit(preds$fit),panel.first=grid(), 
+       type='l',lwd=2,  col = adjustcolor('black',.4),
+       xlab='Prob(Severe Malaria)',
+       ylim = range(100*inv.logit(c(preds$fit+1.96*preds$se.fit,
+                                    rev(preds$fit-1.96*preds$se.fit)))),
+       ylab='Probability of death (%)')
+  polygon(x = c(xs, rev(xs)), 
+          y = 100*inv.logit(c(preds$fit+1.96*preds$se.fit,
+                              rev(preds$fit-1.96*preds$se.fit))),
+          col=adjustcolor('grey', .3), border = NA)
+  title(cc)
+}
+```
+
+
+Summary of lab values by inferred subgroup
+```{r}
+age_subgroups = aggregate(age ~ SM + study, 
+                          dat_all, function(x) round(median(x),1))
+print(age_subgroups)
+
+para_subgroups = aggregate(log10_parasites ~ SM + study, 
+                           dat_all, function(x) round(mean(x),1))
+para_subgroups$log10_parasites=round(10^para_subgroups$log10_parasites)
+print(para_subgroups)
+
+dat_all$log10_wbc = log10(dat_all$wbc)
+wbc_subgroups = aggregate(log10_wbc ~ SM + study, 
+                          dat_all, function(x) round(mean(x),1))
+wbc_subgroups$log10_wbc=round(10^wbc_subgroups$log10_wbc)
+print(wbc_subgroups)
+
+hbb_subgroups = aggregate(sickle ~ SM + study, 
+                          dat_all, table)
+print(hbb_subgroups)
+
+death_subgroups = aggregate(outcome ~ SM + study, 
+                            dat_all, function(x) round(100*mean(x),1))
+print(death_subgroups)
+```
+
+
+```{r wbcs}
+par(las = 1, family='serif',mfrow=c(2,2), cex.lab=1.3, cex.axis=1.3)
+for(cc in unique(dat_all$study)){
+  ind = dat_all$study==cc
+  set.seed(7475)
+  myxs=(dat_all$P_SM)[ind]
+  myys=log10(dat_all$wbc[ind])
+  plot(myxs,myys,panel.first=grid(), 
+       ylim = range(log10(dat_all$wbc),na.rm = T),
+       pch=1, xlim=c(0,1), yaxt='n',
+       col = adjustcolor('black',.4),
+       xlab='Prob(Severe Malaria)',
+       ylab='White blood cell count (x1000 per uL)')
+  axis(2, at = log10(c(1,3,10,30,100)), labels = c(1,3,10,30,100))
+  points(myxs,myys,pch=16,col = adjustcolor('black',.1))
+  mod=gam(myys ~ s(myxs,k=3),
+          data=data.frame(myys=myys,myxs=myxs))
+  pxs=seq(0,1,length.out = 100)
+  lines(pxs,predict(mod, data.frame(myxs=pxs)),lwd=3)
+  title(cc)
+}
+
+mod_wbc = lm(log10_wbc ~ study + SM + age, data = dat_all)
+xx=summary(mod_wbc)
+xx$coefficients
+10^(-xx$coefficients['SM',1])
+
+mod_wbc2 = gam(as.numeric(wbc>15) ~ study + SM + s(age,k=3),
+               family='binomial',
+               data = dat_all)
+xx=summary(mod_wbc2)
+xx$p.pv
+round(exp(xx$coefficients['SM',1] + c(-1,0,1)*xx$coefficients['SM',2]),2)
+
+table(dat_all$study, dat_all$wbc > 15)
+
+```
+
+
+
+
+
+
+## Bacteraemia
+
+Relationship between the blood culture data and the probability of severe malaria.
+We also look at whether WBC values predict bacteraemia
+```{r blood_cultures}
+mod=glm(BS ~ SM, family='binomial',data = dat_all)
+table(dat_all$SM, dat_all$BS)
+
+summary(mod)
+
+xx=summary(mod)$coefficients
+exp(xx[2,1] + c(-1,0,1)*1.96* xx[2,2])
+
+summary(glm(BS ~ log10_wbc, family='binomial', data = dat_all))
+summary(glm(BS ~ log10_wbc, family='binomial', 
+            data = dat_all[dat_all$P_SM>0.8,]))
+
+summary(glm(BS ~ log10_wbc, family='binomial', 
+            data = dat_all[dat_all$P_SM<0.2,]))
+
+```
+
+### Validation using sickle trait
+
+```{r sickle}
+ind = dat_all$sickle%in% 1:2
+mod=glm(SM ~ sickle + study, family='binomial',
+        data.frame(SM=dat_all$SM[ind],
+                   sickle=as.numeric(dat_all$sickle==2)[ind],
+                   study = as.factor(dat_all$study)[ind]))
+xx=summary(mod)$coefficients
+xx
+round(exp(xx['sickle','Estimate']+(c(-1,0,1)*1.96*xx['sickle','Std. Error'])),2)
+
+for(ss in African_studies){
+  ind = dat_all$study==ss & dat_all$sickle%in% 1:2
+  mod=glm(SM ~ sickle, family='binomial',
+          data.frame(SM=dat_all$SM[ind],
+                     sickle=as.numeric(dat_all$sickle==2)[ind]))
+  xx=summary(mod)$coefficients
+  print(ss)
+  print(round(exp(xx['sickle','Estimate']+(c(-1,0,1)*1.96*xx['sickle','Std. Error'])),2))
+}
+
+ind = dat_all$sickle%in% c(1,3)
+table(dat_all$SM, dat_all$sickle, dat_all$study)
+mod=glm(SM ~ sickle + study, family='binomial',
+        data.frame(SM=dat_all$SM[ind],
+                   sickle=as.numeric(dat_all$sickle==3)[ind],
+                   study = as.factor(dat_all$study)[ind]))
+xx=summary(mod)$coefficients
+xx
+round(exp(xx['sickle','Estimate']+(c(-1,0,1)*1.96*xx['sickle','Std. Error'])),2)
+
+
+for(ss in African_studies){
+  ind = dat_all$study==ss & dat_all$sickle%in% c(1,3)
+  mod=glm(SM ~ sickle, family='binomial',
+          data.frame(SM=dat_all$SM[ind],
+                     sickle=as.numeric(dat_all$sickle==3)[ind]))
+  xx=summary(mod)$coefficients
+  print(ss)
+  print(round(exp(xx['sickle','Estimate']+(c(-1,0,1)*1.96*xx['sickle','Std. Error'])),2))
+}
+
+# Additive model
+mod=glm(SM ~ sickle + study, family='binomial',
+        data.frame(SM=dat_all$SM,
+                   sickle=dat_all$sickle,
+                   study = as.factor(dat_all$study)))
+xx=summary(mod)$coefficients
+xx
+round(exp(xx['sickle','Estimate']+(c(-1,0,1)*1.96*xx['sickle','Std. Error'])),2)
+```
+
+
+## other clustering approaches - mclust
+
+mclust
+```{r}
+dat_all$log10_para = log10(dat_all$para+50)
+dat_all$log10_wbc = log10(dat_all$wbc)
+ind = !is.na(dat_all$log10_hrp2)&!is.na(dat_all$log10_platelet)
+sum(ind)
+table(dat_all$study[ind])
+
+X = dat_all[ind, c('log10_hrp2','log10_platelet')]
+mclust_mods = Mclust(data = X, G=3)
+summary(mclust_mods)
+table(dat_all$study[ind],mclust_mods$classification)
+table(dat_all$sickle[ind],mclust_mods$classification)
+comp_cols = brewer.pal(n = mclust_mods$G, name = 'Dark2')
+pairs(X, col = adjustcolor(comp_cols[mclust_mods$classification],.4),
+      pch=16)
+```
+
+### Compare with previously published probabilities
+
+```{r comparison_old_model}
+model1_probs = read.csv(file = 'Kilifi_Model1_Probabilities.csv')
+model1_probs = model1_probs %>% arrange(sample_code) %>% filter(sample_code %in% dat_all$IDs)
+dat_Kilifi = dat_all %>% filter(study=='Kilifi (Kenya)')%>%arrange(IDs)
+
+par(las=1, family='serif', cex.lab=1.3, cex.axis=1.3)
+plot(model1_probs$P_SM1, dat_Kilifi$P_SM,
+     xlab='Prob(Severe Malaria): platelet/white count model',
+     ylab='Prob(Severe Malaria): platelet/PfHRP2 model',
+     panel.first=grid(), main = 'Kilifi (Kenya)')
+abline(lm(dat_Kilifi$P_SM~model1_probs$P_SM1), col='red',lwd=3)
+hist(model1_probs$P_SM1 - dat_Kilifi$P_SM)
+
+
+cor.test(model1_probs$P_SM1, dat_Kilifi$P_SM)
+```
+
+
+
+
+
+Save output
+```{r}
+# dat_kemri = dat_all[dat_all$study=='Kilifi (Kenya)', ]
+# save(dat_kemri, file = 'kemri_PSM.RData')
+```
+
+
+
+### Optimal combination of thresholds
+
+
+We use the model of platelet counts and HRP2, not including the FEAST study (this is more conservative in its estimated operating characteristics)
+
+```{r}
+source('functions.R')
+x1=seq(100,200,by=1)
+x2=seq(500, 1500, by=1)
+my_thresh=expand.grid(plt_thresh = x1, 
+                      hrp2_thresh = x2)
+my_thresh$sens = my_thresh$sp = NA
+for(k in 1:nrow(my_thresh)){
+  out=roc_output(thetas = thetas_plt_hrp2,
+                 stan_dat = stan_dat_plt_hrp2, 
+                 cutofftype = c('upper','lower'), 
+                 mycuts = log10(unlist(my_thresh[k,1:2])))
+  my_thresh$sens[k] = out[1]
+  my_thresh$sp[k] = out[2]
+}
+my_thresh$FP = round(100*(1-my_thresh$sp), 2)
+my_thresh$TP = round(100*my_thresh$sens, 2)
+
+xs = unique(my_thresh$FP)
+ys = array(dim = length(xs))
+for(i in 1:length(xs)){
+  ind = my_thresh$FP == xs[i]
+  ys[i] = max(my_thresh$TP[ind])
+}
+
+my_fp = 5.2
+my_tp = 79
+```
+
+
+Plot results
+```{r optimal_combination}
+f=smooth.spline(x = xs, y = ys,df = 5)
+par(las=1, family='serif', cex.lab=1.3, cex.axis=1.3,mfrow=c(2,2))
+
+
+z_FP = dcast(data = my_thresh, formula = hrp2_thresh~plt_thresh, 
+             value.var='FP')
+range(z_FP[, -1])
+image(y = x1, x=x2, z=as.matrix(z_FP[, -1]),
+      breaks = seq(0,15,length.out = 16),
+      main='False positive rate',yaxt='n',
+      col=hcl.colors(15, "YlGn", rev = TRUE),
+      xlab='PfHRP2 (ng/mL)',ylab='Platelet count (x1000 per uL)')
+axis(2, at = c(100,150,200))
+grid()
+abline(v=800, h=150,lty=2)
+
+z_TP = dcast(data = my_thresh, formula = hrp2_thresh~plt_thresh, value.var='TP')
+range(z_TP[, -1])
+image(y = x1, x=x2, z=as.matrix(z_TP[, -1]),
+      breaks = seq(50,91,length.out = 16),panel.first=grid(),
+      main='True positive rate',yaxt='n',
+      col=hcl.colors(15, "Blue-Red 3", rev = TRUE),
+      xlab='PfHRP2 (ng/mL)',ylab='Platelet count (x1000 per uL)')
+axis(2, at = c(100,150,200))
+grid()
+abline(v=800, h=150,lty=2)
+
+plot(f$x, f$y, panel.first=grid(),
+     xlab = 'False positive rate (%)', 
+     ylab = 'True positive rate (%)',
+     xlim = c(0,15), ylim = c(50, 100), type='l',lwd=2)
+abline(v=5, h=80,lty=2)
+ind = my_thresh$FP < my_fp & my_thresh$TP > my_tp
+
+writeLines(sprintf('There are %s combinations that have a true positive rate greater than %s and a false positive rate less than %s', 
+                   sum(ind), my_tp, my_fp))
+print(my_thresh[ind, ])
+
+## Legend plot
+plot(NA,NA,xlim=0:1,ylim=0:1,yaxt='n',xaxt='n',ylab='',xlab='',bty='n')
+
+lgd_ = rep(NA, 15)
+lgd_[c(1,8,15)] = c(0,8,15)
+legend('left',title = 'False positive rate\n',
+       legend = lgd_,
+       fill = hcl.colors(15, "YlGn", rev = TRUE),
+       bty='n',x.intersp =.5,
+       border = NA,inset = 0.01,
+       y.intersp = 0.5,
+       cex = 1, text.font = 1)
+
+lgd_ = rep(NA, 15)
+lgd_[c(1,8,15)] = c(90,70,50)
+legend('right',title = 'True positive rate\n',
+       legend = lgd_,
+       fill = hcl.colors(15, "Blue-Red 3", rev = F),
+       bty='n',x.intersp =.5,
+       border = NA,inset = 0.01,
+       y.intersp = 0.5,
+       cex = 1, text.font = 1)
+```
+

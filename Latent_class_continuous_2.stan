@@ -49,7 +49,7 @@ generated quantities {
    for(n in 1:N){
       int k = site[n];
       real p1 = prev[k];
-      real p2 = prev[k];
+      real p2 = 1-prev[k];
       for(t in 1:Ntest){
          p1 = p1*exp(normal_lpdf(y[n][t] | mu[t][cluster[t,1]], sigma[t][cluster[t,1]]));
          p2 = p2*exp(normal_lpdf(y[n][t] | mu[t][cluster[t,2]], sigma[t][cluster[t,2]]));
