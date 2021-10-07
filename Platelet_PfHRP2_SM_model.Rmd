@@ -2,7 +2,11 @@
 title: "Platelet count and plasma PfHRP2 concentration to diagnose severe malaria"
 author: "James Watson"
 date: "5/10/2021"
-output: html_document
+output: 
+  html_document: 
+    toc: yes
+    number_sections: yes
+    keep_md: yes
 ---
 
 ```{r setup, include=FALSE}
