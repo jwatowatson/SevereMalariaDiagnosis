@@ -23,7 +23,6 @@ library(gtools)
 library(dplyr)
 library(reshape2)
 
-
 options(mc.cores = parallel::detectCores())
 
 RUN_STAN=F
@@ -34,7 +33,7 @@ thresh_lowSM = 0.2
 ```
 
 ```{r}
-dat_all=read.csv( file = 'dataset.csv')
+dat_all=read.csv(file = 'dataset.csv')
 
 writeLines(sprintf('The dataset contains %s patients with measured PfHRP2 and measured platelet counts from %s studies',
                    nrow(dat_all),
@@ -74,6 +73,7 @@ writeLines(sprintf('After excluding the HRP2 outliers, the dataset contains %s p
 Results for Table 1
 ```{r}
 table(dat_all$study)
+table(dat_all$malaria_positive, dat_all$study)
 
 xx=aggregate(age ~ study, dat_all, quantile, probs=c(0.25,.5,.75))
 colnames(xx$age)=c('lower','median','upper')
@@ -795,22 +795,35 @@ table(dat_all$study, dat_all$wbc > 15)
 ## Bacteraemia
 
 Relationship between the blood culture data and the probability of severe malaria.
-We also look at whether WBC values predict bacteraemia
-```{r blood_cultures}
-mod=glm(BS ~ SM, family='binomial',data = dat_all)
-table(dat_all$SM, dat_all$BS)
+We also look at whether WBC values predict positive blood culture
 
-summary(mod)
+```{r blood_cultures}
+table(dat_all$SM, dat_all$BS, dat_all$study)
+ind_FEAST = dat_all$study=='FEAST (Uganda)'
+ind_Kenya = dat_all$study=='Kilifi (Kenya)'
+ind_mal = dat_all$malaria_positive==1
+
+table(dat_all$BS[ind_FEAST], useNA = 'ifany')
+table(dat_all$BS[ind_FEAST&ind_mal], useNA = 'ifany')
+table(dat_all$BS[ind_Kenya], useNA = 'ifany')
+
+mean(!is.na(dat_all$BS[ind_FEAST]))
+
+mod = glm(BS ~ SM + study, family='binomial',
+        data = dat_all[ind_mal, ])
+summary(mod)$coefficients
+summary(glm(BS ~ SM, family='binomial',
+            data = dat_all[ind_FEAST&ind_mal,])
+        )$coefficients
+summary(glm(BS ~ SM, family='binomial',
+            data = dat_all[ind_Kenya,])
+        )$coefficients
 
 xx=summary(mod)$coefficients
-exp(xx[2,1] + c(-1,0,1)*1.96* xx[2,2])
+round(exp(xx[2,1] + c(-1,0,1)*1.96* xx[2,2]),2)
 
-summary(glm(BS ~ log10_wbc, family='binomial', data = dat_all))
-summary(glm(BS ~ log10_wbc, family='binomial', 
-            data = dat_all[dat_all$P_SM>0.8,]))
-
-summary(glm(BS ~ log10_wbc, family='binomial', 
-            data = dat_all[dat_all$P_SM<0.2,]))
+summary(glm(BS ~ log10_wbc + study, family='binomial',
+            data = dat_all[ind_mal, ]))
 
 ```
 
@@ -1016,5 +1029,20 @@ legend('right',title = 'True positive rate\n',
        border = NA,inset = 0.01,
        y.intersp = 0.5,
        cex = 1, text.font = 1)
+```
+
+
+
+Slightly random: predict SM status using HRP2 and HCT
+```{r}
+ind_SM = dat_all$P_SM > .9
+plot(dat_all$hct[ind_SM], log10(dat_all$hrp2[ind_SM]))
+
+dat_all$study = as.factor(dat_all$study)
+modSM = gam(SM ~ s(hct,k=3) + s(log10(hrp2+1),k=3)+
+              s(log10_parasites,k=3)
+            + s(study, bs='re'),family='binomial', data=dat_all)
+plot(modSM)
+save(modSM, file = 'SMmodel')
 ```
 

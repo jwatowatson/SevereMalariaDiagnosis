@@ -56,12 +56,12 @@ roc_analysis = function(thetas, stan_dat, xvals,
            legend = c('Sensitivity','Specificity'))
   }
   
-  plot(1-sp[[1]], sens[[1]], type='l',
-       xlab = 'False positive rate', ylim=c(0,1),
-       ylab = 'True positive rate', xlim=c(0,1),
+  plot(100*(1-sp[[1]]), 100*sens[[1]], type='l',
+       xlab = 'False positive rate (%)', ylim=c(0,1),
+       ylab = 'True positive rate (%)', xlim=c(0,1),
        lwd=2, lty=1, panel.first=grid())
   for(i in 2:Ntest){
-    lines(1-sp[[i]], sens[[i]], type='l',lty=i,lwd=2)
+    lines(100*(1-sp[[i]]), 100*sens[[i]], type='l',lty=i,lwd=2)
   }
   lines(0:1,0:1)
   legend('bottomright', legend = xnames,lwd=2,lty=1:3,
