@@ -34,7 +34,15 @@ source('functions.R')
 
 thresh_highSM = 0.8
 thresh_lowSM = 0.2
+
+
+sessionInfo()
 ```
+
+
+# Load dataset 
+
+## Check outliers
 
 ```{r}
 dat_all=read.csv(file = 'dataset.csv')
@@ -53,7 +61,8 @@ mycols = adjustcolor(brewer.pal(n = 10, 'Paired')[c(2,4,6,10)],
 ```
 
 
-Some data cleaning
+## Some data cleaning
+
 ```{r}
 hist(dat_all$hct, breaks = 50)
 # get rid of outlier HCT values
@@ -74,7 +83,7 @@ writeLines(sprintf('After excluding the HRP2 outliers, the dataset contains %s p
 
 ## Overview of patient characteristics
 
-Results for Table 1
+Results for Table 1 in the paper
 ```{r}
 table(dat_all$study)
 table(dat_all$malaria_positive, dat_all$study)
@@ -97,16 +106,12 @@ xx$para = round(xx$para)
 print(xx)
 
 table(dat_all$study, dat_all$sickle)
-
-
-# xx = aggregate(log10_parasites ~ study, dat_all[ind_pos, ], mean)
-# xx[,2] = round(10^xx[,2])
-# print(xx)
 ```
 
 
 
-Correlation between the two biomarkers
+Correlation between the platelet count and the PfHRP2 concentration
+
 ```{r}
 writeLines('African sites: correlation:')
 ind_Africa = dat_all$study %in% African_studies
@@ -125,6 +130,7 @@ round(res$estimate,2)
 ```
 
 Summary plot of the biomarker data
+
 ```{r platelet_hrp2_data}
 mycols = rep('black',4)
 dat_all$log10_platelet=log10(dat_all$platelet)
@@ -155,8 +161,10 @@ for(cc in unique(dat_all$study)){
 }
 ```
 
-## Fitting a mixture model to platelets and HRP2
-### Two component mixture - not including FEAST
+# Fitting a mixture model to platelets and HRP2
+## Two component mixture - not including FEAST
+
+### Main model
 
 Analysis not including the FEAST study - only severe malaria studies
 ```{r setup_stan_model}
@@ -209,12 +217,16 @@ stan_dat_plt_hrp2$prior_sigma_mu = stan_dat_all$prior_sigma_mu[1:2,]
 stan_dat_plt_hrp2$cluster = stan_dat_all$cluster[1:2,]
 ```
 
+
+compile the stan model
 ```{r compile_stan_model2}
 # compile stan model
 lc_mod = stan_model(file = 'Latent_class_continuous_2.stan')
 ```
 
 
+Run the stan model - this is stored in Rout
+We check convergence with the traceplots
 
 ```{r run_stan_models2}
 fname_all = paste0('Rout/', 'mod2_LC_all.stanfit')
@@ -273,6 +285,8 @@ round(10^(apply(thetas_plt_hrp2$mu, 2:3, mean)+ 1.96*apply(thetas_plt_hrp2$sigma
 round(10^(apply(thetas_plt_hrp2$mu, 2:3, mean)- 1.96*apply(thetas_plt_hrp2$sigma, 2:3, mean)))
 ```
 
+
+Check conditional independence - are the biomarkers correlated within the latent classes?
 
 ```{r conditional_indep_mod2}
 par(mfrow=c(2,2), las=1)
@@ -344,6 +358,7 @@ stan_dat_plt_hrp2_Af$prior_sigma_mu =stan_dat_all_Af$prior_sigma_mu[1:2,]
 stan_dat_plt_hrp2_Af$cluster = stan_dat_all_Af$cluster[1:2,]
 ```
 
+run model and check convergence
 
 ```{r fit_stan_model_sensitivityanalysis}
 fname_all_Af = paste0('Rout/', 'mod2_LC_all_Af.stanfit')
@@ -383,9 +398,9 @@ print(mean_vals2)
 ```
 
 
-#### ROC curves
+### ROC curves comparing model fits
 
-
+All model 2 ROC curves
 ```{r roc_curves_mod2}
 par(mfcol=c(2,2),las=1,cex.lab=1.3,cex.axis=1.3,family='serif')
 roc_analysis(thetas = thetas_all, stan_dat = stan_dat_all,
@@ -422,7 +437,7 @@ roc_analysis(thetas = thetas_plt_hrp2, stan_dat = stan_dat_plt_hrp2,
 ```
 
 
-### Three component mixture model
+## Three component mixture - including FEAST
 
 ```{r compile_stan_model3}
 lc3_mod = stan_model(file = 'Latent_class_continuous_3.stan')
@@ -489,6 +504,8 @@ plot(colMeans(thetas_final$ps_SM)[ind_not_FEAST],
 lines(0:1, 0:1)
 ```
 
+### Conditional independence check
+
 Check conditional independence
 ```{r conditional_indep_mod3}
 ps = apply(thetas_final$ps_comp, 2:3, mean)
@@ -522,7 +539,8 @@ cor.test(stan_dat$y[ind_2, 1],stan_dat$y[ind_2,2])
 ```
 
 
-ROC curves
+### ROC curves
+
 ```{r roc_curves_mod3}
 par(mfcol=c(2,2),las=1,cex.lab=1.3,cex.axis=1.3,family='serif')
 roc_analysis(thetas = thetas_final, stan_dat = stan_dat,
@@ -542,7 +560,9 @@ hist(dat_all$P_SM, breaks = 20,main='Final model', xlab='P(SM)')
 
 
 
-## Subsequent analysis
+# Downstream analyses
+
+## Severe malaria probability and subphenotypes
 
 Relationship with the two main subphenotypes, cerebral malaria and severe malaria anaemia
 ```{r}
@@ -612,6 +632,7 @@ legend('bottomleft',
 legend('bottomright',pch=2:3, legend = c('HbAS','HbSS'),inset=0.03)
 ```
 
+## Parasite densities
 
 ```{r parasite_densities}
 ### Parasite counts
@@ -645,7 +666,7 @@ for(cc in unique(dat_all$study)){
 
 
 
-## Haematocrit
+## Admission haematocrits
 
 
 ```{r haematocrits}
@@ -700,6 +721,8 @@ for(cc in c("FEAST (Uganda)","Kampala (Uganda)", "Kilifi (Kenya)")){
 ```
 
 
+## Mortality
+
 
 P(Severe malaria) and mortality
 ```{r mortality}
@@ -752,6 +775,8 @@ death_subgroups = aggregate(outcome ~ SM + study,
 print(death_subgroups)
 ```
 
+## Total white blood cell counts
+
 
 ```{r wbcs}
 par(las = 1, family='serif',mfrow=c(2,2), cex.lab=1.3, cex.axis=1.3)
@@ -780,9 +805,10 @@ xx=summary(mod_wbc)
 xx$coefficients
 10^(-xx$coefficients['SM',1])
 
+ind_mal = dat_all$malaria_positive==1
 mod_wbc2 = gam(as.numeric(wbc>15) ~ study + SM + s(age,k=3),
                family='binomial',
-               data = dat_all)
+               data = dat_all[ind_mal, ])
 xx=summary(mod_wbc2)
 xx$p.pv
 round(exp(xx$coefficients['SM',1] + c(-1,0,1)*xx$coefficients['SM',2]),2)
@@ -790,11 +816,6 @@ round(exp(xx$coefficients['SM',1] + c(-1,0,1)*xx$coefficients['SM',2]),2)
 table(dat_all$study, dat_all$wbc > 15)
 
 ```
-
-
-
-
-
 
 ## Bacteraemia
 
@@ -831,7 +852,7 @@ summary(glm(BS ~ log10_wbc + study, family='binomial',
 
 ```
 
-### Validation using sickle trait
+# Validation using sickle trait
 
 ```{r sickle}
 ind = dat_all$sickle%in% 1:2
@@ -885,7 +906,7 @@ round(exp(xx['sickle','Estimate']+(c(-1,0,1)*1.96*xx['sickle','Std. Error'])),2)
 ```
 
 
-## other clustering approaches - mclust
+# Other clustering approaches - mclust
 
 mclust
 ```{r}
@@ -905,7 +926,7 @@ pairs(X, col = adjustcolor(comp_cols[mclust_mods$classification],.4),
       pch=16)
 ```
 
-### Compare with previously published probabilities
+# Compare with previously published probabilities
 
 ```{r comparison_old_model}
 model1_probs = read.csv(file = 'Kilifi_Model1_Probabilities.csv')
@@ -936,7 +957,7 @@ Save output
 
 
 
-### Optimal combination of thresholds
+# Optimal combination of thresholds
 
 
 We use the model of platelet counts and HRP2, not including the FEAST study (this is more conservative in its estimated operating characteristics)
@@ -1036,6 +1057,7 @@ legend('right',title = 'True positive rate\n',
 ```
 
 
+# Predicting Severe Malaria using HRP2, parasite counts and HCT
 
 Slightly random: predict SM status using HRP2 and HCT
 ```{r}
