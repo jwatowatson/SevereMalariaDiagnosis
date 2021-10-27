@@ -308,6 +308,12 @@ Results for Table 1 in the paper
 ##   Kilifi (Kenya)   1348   41    7
 ```
 
+```
+##   as.numeric(dat_all$platelet <= 150) hrp2.25% hrp2.50% hrp2.75%
+## 1                                   0       24      269     1043
+## 2                                   1     1261     3031     6035
+```
+
 
 
 Correlation between the platelet count and the PfHRP2 concentration
@@ -394,14 +400,14 @@ We merge all the data into one and fit mclust
 ## Gaussian finite mixture model fitted by EM algorithm 
 ## ---------------------------------------------------- 
 ## 
-## Mclust VEV (ellipsoidal, equal shape) model with 4 components: 
+## Mclust VVE (ellipsoidal, equal orientation) model with 3 components: 
 ## 
 ##  log-likelihood    n df       BIC       ICL
-##       -6671.425 2477 33 -13600.74 -14640.71
+##       -6826.373 2477 23 -13832.49 -14386.62
 ## 
 ## Clustering table:
-##    1    2    3    4 
-## 1038  140  837  462
+##    1    2    3 
+##  910  148 1419
 ```
 
 ```
@@ -412,11 +418,11 @@ We merge all the data into one and fit mclust
 ## Mclust VVE (ellipsoidal, equal orientation) model with 4 components: 
 ## 
 ##  log-likelihood    n df       BIC       ICL
-##       -3708.804 2477 20 -7573.904 -8377.639
+##       -3702.525 2477 20 -7561.347 -8380.208
 ## 
 ## Clustering table:
 ##    1    2    3    4 
-##   66  144 1486  781
+##  139  770   80 1488
 ```
 
 ![](Platelet_PfHRP2_SM_model_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
@@ -429,11 +435,11 @@ We merge all the data into one and fit mclust
 ## Mclust VEV (ellipsoidal, equal shape) model with 4 components: 
 ## 
 ##  log-likelihood    n df       BIC       ICL
-##       -5850.394 2477 20 -11857.08 -12957.88
+##       -5841.928 2477 20 -11840.15 -12924.89
 ## 
 ## Clustering table:
 ##   1   2   3   4 
-## 589 853 891 144
+## 898 859 574 146
 ```
 
 ![](Platelet_PfHRP2_SM_model_files/figure-html/unnamed-chunk-5-2.png)<!-- -->
@@ -445,12 +451,12 @@ We merge all the data into one and fit mclust
 ## 
 ## Mclust VVE (ellipsoidal, equal orientation) model with 3 components: 
 ## 
-##  log-likelihood    n df       BIC       ICL
-##        -4172.28 2477 15 -8461.781 -9076.909
+##  log-likelihood    n df       BIC      ICL
+##       -4172.268 2477 15 -8461.758 -9076.87
 ## 
 ## Clustering table:
 ##    1    2    3 
-## 1319  196  962
+##  962  196 1319
 ```
 
 ![](Platelet_PfHRP2_SM_model_files/figure-html/unnamed-chunk-5-3.png)<!-- -->
@@ -458,10 +464,10 @@ We merge all the data into one and fit mclust
 ```
 ##                   
 ##                      1   2   3   4
-##   Bangladesh         3   0 139  28
-##   FEAST (Uganda)    28 141 139 117
-##   Kampala (Uganda)   8   0 321 155
-##   Kilifi (Kenya)    27   3 887 481
+##   Bangladesh         0  28   3 139
+##   FEAST (Uganda)   136 114  36 139
+##   Kampala (Uganda)   0 154   9 321
+##   Kilifi (Kenya)     3 474  32 889
 ```
 
 
@@ -575,7 +581,7 @@ We check convergence with the traceplots
 ## thetas_all_cor
 ##                 
 ##                  not SM   SM
-##   Platelet count    222   74
+##   Platelet count    221   74
 ##   PfHRP2            189 3205
 ## thetas_all_cor_WP
 ##                 
@@ -603,8 +609,8 @@ We check convergence with the traceplots
 ```
 ##       
 ##             [,1]      [,2]
-##   [1,] 0.3056151 0.7690742
-##   [2,] 0.3189634 0.4559764
+##   [1,] 0.3051498 0.7711259
+##   [2,] 0.3185904 0.4561778
 ```
 
 ```
@@ -626,7 +632,7 @@ We check convergence with the traceplots
 ```
 
 ```
-## [1] 0.1761821
+## [1] 0.1781846
 ```
 
 ```
@@ -634,17 +640,17 @@ We check convergence with the traceplots
 ```
 
 ```
-## [1] 0.2406991
+## [1] 0.2396636
 ```
 
 ![](Platelet_PfHRP2_SM_model_files/figure-html/check_model_fits-5.png)<!-- -->
 
 ```
-## [1] 1304
+## [1] 1303
 ```
 
 ```
-## [1] 403
+## [1] 404
 ```
 
 
@@ -713,6 +719,12 @@ Run model and check convergence
 
 Empirical ROC curves derived from patient probabilties
 ![](Platelet_PfHRP2_SM_model_files/figure-html/roc_curves_mod2_empirical-1.png)<!-- -->
+
+### ROC curves for sensitivity analyses
+
+![](Platelet_PfHRP2_SM_model_files/figure-html/sensitivity_roc-1.png)<!-- -->
+
+
 
 ## Three component mixture - including FEAST
 
@@ -1585,11 +1597,11 @@ Save output
 Plot results
 
 ```
-## [1]  1.91 30.88
+## [1]  1.93 31.00
 ```
 
 ```
-## [1] 47.75 91.21
+## [1] 47.76 91.27
 ```
 
 ```
@@ -1597,12 +1609,12 @@ Plot results
 ```
 
 ```
-## There are 5151 combinations that have a true positive rate greater than 75 and a false positive rate less than 10
+## There are 5073 combinations that have a true positive rate greater than 75 and a false positive rate less than 10
 ```
 
 ```
-##       plt_thresh hrp2_thresh  x1_trans x2_trans    TP   FP ProbSM
-## 18231        150        1000 -2.176091        3 73.56 6.62     94
+##       plt_thresh hrp2_thresh  x1_trans x2_trans   TP   FP ProbSM
+## 18231        150        1000 -2.176091        3 73.6 6.69     94
 ```
 
 ![](Platelet_PfHRP2_SM_model_files/figure-html/optimal_combination-1.png)<!-- -->
@@ -1623,12 +1635,12 @@ Slightly random: predict SM status using HRP2 and HCT
 ## 
 ## Parametric coefficients:
 ##             Estimate Std. Error z value Pr(>|z|)
-## (Intercept)    1.412     11.746    0.12    0.904
+## (Intercept)    1.409     11.738    0.12    0.904
 ## 
 ## Approximate significance of smooth terms:
 ##                      edf Ref.df Chi.sq  p-value    
 ## s(hct)             1.941  1.997  15.70 0.000329 ***
-## s(log10(hrp2 + 1)) 1.764  1.944 243.53  < 2e-16 ***
+## s(log10(hrp2 + 1)) 1.763  1.944 243.49  < 2e-16 ***
 ## s(log10_parasites) 1.678  1.896  16.71 0.000124 ***
 ## s(study)           2.997  3.000  49.06 8.53e-11 ***
 ## ---

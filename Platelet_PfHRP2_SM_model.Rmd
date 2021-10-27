@@ -110,6 +110,10 @@ xx$para = round(xx$para)
 print(xx)
 
 table(dat_all$study, dat_all$sickle)
+
+xx = (aggregate(hrp2 ~ as.numeric(dat_all$platelet <= 150), data = dat_all, quantile, probs=c(0.25,.5,.75)))
+xx$hrp2 = round(xx$hrp2)
+print(xx)
 ```
 
 
@@ -172,7 +176,7 @@ mclust is a generic Bayesian clustering algorithm (fits multivariate normals to 
 
 We merge all the data into one and fit mclust
 
-```{r}
+```{r mclust}
 ind_not_na = !is.na(dat_all$log10_hrp2)&
   !is.na(dat_all$log10_platelet) &
   !is.na(dat_all$log10_parasites)
@@ -291,9 +295,11 @@ if(RUN_STAN | !file.exists(fname_all)){
   load(fname_all)
 }
 
+## This is the main model
 fname_all_cor = paste0('Rout/', 'mod2_LC_all_cor.stanfit')
 if(RUN_STAN | !file.exists(fname_all_cor)){
-  out_all_cor = sampling(lc_mod_cor, data=stan_dat_all, thin=4)
+  out_all_cor = sampling(lc_mod_cor, data=stan_dat_all,
+                         thin=20,iter=10000,chain=4)
   save(out_all_cor, file = fname_all_cor)
 } else {
   load(fname_all_cor)
@@ -686,6 +692,95 @@ legend('bottomright',lty=1, cex=1.5,
        legend = c('Platelet count','Plasma PfHRP2'),
        col=cols,lwd=2,inset=0.03)
 ```
+
+### ROC curves for sensitivity analyses
+
+```{r sensitivity_roc}
+par(mfrow=c(2,3),las=1,cex.lab=1.3,cex.axis=1.3,family='serif')
+
+roc_SA1 = make_ROC_SM(thetas = thetas_all_cor_tdist, 
+                        stan_dat = stan_dat_all,
+                        xvals = matrix(c(-log10(10),
+                                         -log10(1000),1,5),
+                                       nrow = 2,byrow = T), 
+                        Ntest = 2,
+                        SM_comp = 2,
+                        cutofftype = c('lower','lower'))
+plot((-roc_SA1$xs[[1]]), 100*roc_SA1$sens[[1]],
+     type='l',panel.first=grid(), lwd=2,col=cols[1],
+     xlab = 'Platelet count (x1000 per uL)',lty=3,
+     ylab = '%', xlim = log10(c(50, 400)),xaxt='n')
+lines((-roc_SA1$xs[[1]]), 100*roc_SA1$sp[[1]], 
+      lwd=2, lty=2,col=cols[1])
+axis(1, at = log10(c(50, 100, 150, 250,400)), labels = c(50, 100, 150, 250,400))
+abline(v=log10(150))
+legend('bottom',lty=3:2, legend = c('Sensitivity','Specificity'),
+       cex = 1.5, lwd=2,inset=0.03)
+
+
+plot((roc_SA1$xs[[2]]), 100*roc_SA1$sens[[2]],
+     type='l',panel.first=grid(), lwd=2,col=cols[2],
+     xlab = 'Plasma PfHRP2 (ng/mL)',xaxt='n',lty=3,
+     ylab = '%', xlim = log10(c(100, 10000)))
+lines((roc_SA1$xs[[2]]), 100*roc_SA1$sp[[2]],
+      col=cols[2], lwd=2,lty=2)
+axis(1, at = log10(c(100, 300, 1000,3000,10000)), labels = c(100, 300, 1000,3000,10000))
+abline(v=log10(1000))
+plot(100*(1-roc_SA1$sp[[1]]), 100*roc_SA1$sens[[1]],
+     type='l',col=cols[1],
+     xlab = 'False positive rate (%)', ylim=c(0,100),
+     ylab = 'True positive rate (%)', xlim=c(0,100),
+     lwd=3, lty=1, panel.first=grid())
+lines(100*(1-roc_SA1$sp[[2]]), 100*roc_SA1$sens[[2]],
+      col=cols[2], lwd=3)
+lines(0:100, 0:100)
+legend('bottomright',lty=1, cex=1.5,
+       legend = c('Platelet count','Plasma PfHRP2'),
+       col=cols,lwd=2,inset=0.03)
+
+roc_SA2 = make_ROC_SM(thetas = thetas_all_cor_WP, 
+                        stan_dat = stan_dat_all,
+                        xvals = matrix(c(-log10(10),
+                                         -log10(1000),1,5),
+                                       nrow = 2,byrow = T), 
+                        Ntest = 2,
+                        SM_comp = 2,
+                        cutofftype = c('lower','lower'))
+
+plot((-roc_SA2$xs[[1]]), 100*roc_SA2$sens[[1]],
+     type='l',panel.first=grid(), lwd=2,col=cols[1],
+     xlab = 'Platelet count (x1000 per uL)',lty=3,
+     ylab = '%', xlim = log10(c(50, 400)),xaxt='n')
+lines((-roc_SA2$xs[[1]]), 100*roc_SA2$sp[[1]], 
+      lwd=2, lty=2,col=cols[1])
+axis(1, at = log10(c(50, 100, 150, 250,400)), labels = c(50, 100, 150, 250,400))
+abline(v=log10(150))
+legend('bottom',lty=3:2, legend = c('Sensitivity','Specificity'),
+       cex = 1.5, lwd=2,inset=0.03)
+
+
+plot((roc_SA2$xs[[2]]), 100*roc_SA2$sens[[2]],
+     type='l',panel.first=grid(), lwd=2,col=cols[2],
+     xlab = 'Plasma PfHRP2 (ng/mL)',xaxt='n',lty=3,
+     ylab = '%', xlim = log10(c(100, 10000)))
+lines((roc_SA2$xs[[2]]), 100*roc_SA2$sp[[2]],
+      col=cols[2], lwd=2,lty=2)
+axis(1, at = log10(c(100, 300, 1000,3000,10000)), labels = c(100, 300, 1000,3000,10000))
+abline(v=log10(1000))
+plot(100*(1-roc_SA2$sp[[1]]), 100*roc_SA2$sens[[1]],
+     type='l',col=cols[1],
+     xlab = 'False positive rate (%)', ylim=c(0,100),
+     ylab = 'True positive rate (%)', xlim=c(0,100),
+     lwd=3, lty=1, panel.first=grid())
+lines(100*(1-roc_SA2$sp[[2]]), 100*roc_SA2$sens[[2]],
+      col=cols[2], lwd=3)
+lines(0:100, 0:100)
+legend('bottomright',lty=1, cex=1.5,
+       legend = c('Platelet count','Plasma PfHRP2'),
+       col=cols,lwd=2,inset=0.03)
+```
+
+
 
 ## Three component mixture - including FEAST
 
