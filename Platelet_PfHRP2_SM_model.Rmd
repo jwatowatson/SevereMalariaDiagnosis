@@ -219,6 +219,8 @@ Analysis not including the FEAST study - only severe malaria studies
 
 We convert the platelet counts and HRP2 measurements to log10 scale. The Platelet counts then get multiplied by minus 1: this is so that increasing values correspond to more likely severe malaria. This is because the underlying stan model uses the *ordered* vector type to avoid label switching problems. 
 
+It was not possible to get reasonable fits from this model when we included the parasite density. This most likely results from model mis-specification. The parasite density has a lower discriminatory value for severe malaria as shown by our exploratory analyses (see github). Parasite density is mechanistically related to the \textit{Pf}HRP2 concentration. Pre-referral treatment with antimalarials (which is common in severe malaria referrals) can reduce the admission parasite density substantially (thus a much larger variance in the biomarker values for the true severe malaria subgroup). For these reasons, the main models only used the platelet counts and \textit{Pf}HRP2 concentrations.
+
 ```{r setup_stan_model}
 # make numeric matrix for stan input
 ind_SMstudies = dat_all$study != 'FEAST (Uganda)'
