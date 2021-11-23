@@ -1,11 +1,11 @@
 # Diagnosing severe malaria using platelets and *Pf*HRP2
  
-This repository provides replication materials for "Improving the precision of severe malaria diagnosis in African children using platelet counts and plasma *Pf*HRP2 concentrations".
+This repository provides replication materials for "Improving the precision of severe malaria diagnosis in African children using platelet counts and plasma *Pf*HRP2 concentrations". A preprint version is available at https://www.medrxiv.org/content/10.1101/2021.10.27.21265557v1.
 
 [![DOI](https://zenodo.org/badge/412716066.svg)](https://zenodo.org/badge/latestdoi/412716066)
 
 
-All data analysis is done in the RMarkdown file *Platelet_PfHRP2_SM_model.Rmd*. The R script *functions.R* has a few useful ROC curve functions, and the stan models are in the *.stan* scripts.
+All data analysis is done within the RMarkdown file *Platelet_PfHRP2_SM_model.Rmd*. The R script *functions.R* has a few useful ROC curve functions, and the stan models are in the *.stan* scripts.
 
 ## Overview of dataset
 
