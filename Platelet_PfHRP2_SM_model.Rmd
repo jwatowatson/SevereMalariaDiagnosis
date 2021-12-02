@@ -167,6 +167,10 @@ for(cc in unique(dat_all$study)){
        labels = c(1, 10, expression(10^2),expression(10^3), 
                   expression(10^4),expression(10^5)))
 }
+
+par(mfrow=c(1,2))
+hist(dat_all$log10_hrp2, breaks = 40, main='',xlab='log10 PfHRP2 - all data')
+hist(dat_all$log10_platelet, breaks = 40, main='',xlab='log10 platelets - all data')
 ```
 
 
@@ -177,38 +181,59 @@ mclust is a generic Bayesian clustering algorithm (fits multivariate normals to 
 We merge all the data into one and fit mclust
 
 ```{r mclust}
+mclust_cols = RColorBrewer::brewer.pal(8,'Dark2')
+par(las=1, family='serif', cex.lab=1.3, cex.axis=1.3)
 ind_not_na = !is.na(dat_all$log10_hrp2)&
   !is.na(dat_all$log10_platelet) &
   !is.na(dat_all$log10_parasites)
 sum(ind_not_na)
 table(dat_all$study[ind_not_na])
 
-X = dat_all[ind_not_na,
-            c('log10_hrp2','log10_platelet','log10_parasites')]
+X = dat_all[,c('log10_hrp2','log10_platelet','log10_parasites')]
 
-mclust_mods_all = Mclust(data = X,G = 3:4)
+mclust_mods_all = Mclust(data = X[ind_not_na,],
+                         G = 3:10)
 summary(mclust_mods_all)
 
-mclust_mods_PH = Mclust(data = X[, 1:2],G = 3:4)
+# use VVV: ellipsoidal, varying volume, shape, and orientation
+mclust_mods_PH = Mclust(data =  X[, 1:2],
+                        G = 3:6,
+                        initialization = list(hcUse='PCR'),
+                        modelNames = 'VVV')
+
 summary(mclust_mods_PH)
-plot(X[,1], X[,2], col=mclust_mods_PH$classification,
-     xlab='HRP2',ylab='Platelet count')
 
-mclust_mods_ParaH = Mclust(data = X[, c(1,3)],G = 3:4)
+plot(dat_all$log10_hrp2, dat_all$log10_platelet,
+     col= mclust_cols[mclust_mods_PH$classification],
+     panel.first=grid(),
+     xlab='Log10 Plasma PfHRP2',
+     ylab='Log10 Platelet count (x1000 per uL)')
+
+mclust_mods_ParaH = Mclust(data = X[ind_not_na, c(1,3)],
+                           G = 1:8,
+                           modelNames = 'VVV')
 summary(mclust_mods_ParaH)
-plot(X[,1], X[,3], col=mclust_mods_ParaH$classification,
-     xlab='HRP2',ylab='Parasite count')
 
-mclust_mods_ParaP = Mclust(data = X[, c(2,3)],G = 3:4)
+plot(X[ind_not_na,1], X[ind_not_na,3],
+     col=mclust_mods_ParaH$classification,
+     xlab='Plasma PfHRP2',ylab='Parasite count (per uL)')
+
+mclust_mods_ParaP = Mclust(data = X[ind_not_na, c(2,3)],
+                           G = 1:8,
+                           modelNames = 'VVV')
 summary(mclust_mods_ParaP)
-plot(X[,2], X[,3], col=mclust_mods_ParaP$classification,
+plot(X[ind_not_na,2], X[ind_not_na,3],
+     col=mclust_mods_ParaP$classification,
      ylab='Parasite count',xlab='Platelet count')
 
-table(dat_all$study[ind_not_na], mclust_mods_PH$classification)
+table(dat_all$study, mclust_mods_PH$classification)
 ```
 
 
-In conclusion, the distribution of the parasite count is less easily decomposed than that of the platelet count or HRP2 concentration. The HRP2 and platelet count is the only one where the estimated break is not othorgonal to either variable.
+In conclusion, the distribution of the parasite count is less easily decomposed than that of the platelet count or HRP2 concentration. The HRP2 and platelet count is the only one where the estimated break is not orthogonal to either variable.
+
+
+
 
 # Fitting a mixture model to platelets and HRP2
 ## Two component mixture - not including FEAST
@@ -237,8 +262,8 @@ stan_dat_all =
        Ntest = ncol(X),
        K_sites = max(site_index_SMstudies),
        site = site_index_SMstudies,
-       prior_mu = matrix(data = c(-log10(c(250, 75)),
-                                  log10(c(200, 3000))),
+       prior_mu = matrix(data = c(-log10(c(200, 100)),
+                                  log10(c(500, 2500))),
                          nrow = ncol(X),
                          byrow = T),
        prior_mu_sigma = matrix(data = c(.1,.1,
@@ -301,7 +326,7 @@ if(RUN_STAN | !file.exists(fname_all)){
 fname_all_cor = paste0('Rout/', 'mod2_LC_all_cor.stanfit')
 if(RUN_STAN | !file.exists(fname_all_cor)){
   out_all_cor = sampling(lc_mod_cor, data=stan_dat_all,
-                         thin=20,iter=10000,chain=4)
+                         thin=10,iter=5000,chain=4)
   save(out_all_cor, file = fname_all_cor)
 } else {
   load(fname_all_cor)
@@ -353,6 +378,11 @@ writeLines('mean values estimates for the 4 models:\n')
 for(i in 1:length(mods)){
   theta = mods[[i]]
   mean_vals = t(apply(theta$mu, 2:3, mean))
+  if(i==2){
+    mu_pred = mean_vals
+    sigma_pred_SM = apply(theta$Sigma[, 1,,], 2:3, mean)
+    sigma_pred_notSM = apply(theta$Sigma[, 2,,], 2:3, mean)
+  }
   mean_vals[1,] = -mean_vals[1,] 
   mean_vals = round(10^mean_vals)
   colnames(mean_vals) = c('not SM', 'SM')
@@ -362,6 +392,7 @@ for(i in 1:length(mods)){
   print(mean_vals)
 }
 
+save(mu_pred, sigma_pred_SM, sigma_pred_notSM, file = 'SM_pred_model.RData')
 writeLines('Standard deviation estimates for the 4 models:\n')
 apply(thetas_all$sigma, 2:3, mean)
 apply(thetas_all_cor$sigma, 2:3, mean)
@@ -495,7 +526,6 @@ for(cc in unique(dat_all$study[dat_all$study != 'FEAST (Uganda)'])){
                   expression(10^5)))
   
 }
-
 lgd_ = rep(NA, n_levels)
 lgd_[c(1,6,11)] = c(1,0.5,0)
 legend('bottomleft',
@@ -509,16 +539,17 @@ legend('bottomright',pch=2:3, legend = c('HbAS','HbSS'),inset=0.03)
 ```
 
 
-### Platelet counts in not Severe Malaria
+### Platelet counts in not Severe Malaria and Severe Malaria
 
 ```{r}
+par(las=1, mfrow=c(2,2), family='serif')
 ind_rand_notSM = !is.na(dat_all$P_SM1) & (dat_all$P_SM1< 0.5)
-hist(dat_all$log10_platelet[ind_rand_notSM])
-hist(dat_all$log10_parasites[ind_rand_notSM])
+hist(dat_all$log10_platelet[ind_rand_notSM],main='not SM',xlab='Log10 platelets',xlim=c(1,3))
+hist(dat_all$log10_parasites[ind_rand_notSM],main='not SM',xlab='Log10 parasite density',xlim=c(2,7))
 
 ind_rand_SM = !is.na(dat_all$P_SM1) & (dat_all$P_SM1 > 0.5)
-hist(dat_all$log10_platelet[ind_rand_SM])
-hist(dat_all$log10_parasites[ind_rand_SM])
+hist(dat_all$log10_platelet[ind_rand_SM],main='SM',xlab='Log10 platelets',xlim=c(1,3))
+hist(dat_all$log10_parasites[ind_rand_SM],main='SM',xlab='Log10 parasite density',xlim=c(2,7))
 ```
 
 
@@ -701,13 +732,13 @@ legend('bottomright',lty=1, cex=1.5,
 par(mfrow=c(2,3),las=1,cex.lab=1.3,cex.axis=1.3,family='serif')
 
 roc_SA1 = make_ROC_SM(thetas = thetas_all_cor_tdist, 
-                        stan_dat = stan_dat_all,
-                        xvals = matrix(c(-log10(10),
-                                         -log10(1000),1,5),
-                                       nrow = 2,byrow = T), 
-                        Ntest = 2,
-                        SM_comp = 2,
-                        cutofftype = c('lower','lower'))
+                      stan_dat = stan_dat_all,
+                      xvals = matrix(c(-log10(10),
+                                       -log10(1000),1,5),
+                                     nrow = 2,byrow = T), 
+                      Ntest = 2,
+                      SM_comp = 2,
+                      cutofftype = c('lower','lower'))
 plot((-roc_SA1$xs[[1]]), 100*roc_SA1$sens[[1]],
      type='l',panel.first=grid(), lwd=2,col=cols[1],
      xlab = 'Platelet count (x1000 per uL)',lty=3,
@@ -741,13 +772,13 @@ legend('bottomright',lty=1, cex=1.5,
        col=cols,lwd=2,inset=0.03)
 
 roc_SA2 = make_ROC_SM(thetas = thetas_all_cor_WP, 
-                        stan_dat = stan_dat_all,
-                        xvals = matrix(c(-log10(10),
-                                         -log10(1000),1,5),
-                                       nrow = 2,byrow = T), 
-                        Ntest = 2,
-                        SM_comp = 2,
-                        cutofftype = c('lower','lower'))
+                      stan_dat = stan_dat_all,
+                      xvals = matrix(c(-log10(10),
+                                       -log10(1000),1,5),
+                                     nrow = 2,byrow = T), 
+                      Ntest = 2,
+                      SM_comp = 2,
+                      cutofftype = c('lower','lower'))
 
 plot((-roc_SA2$xs[[1]]), 100*roc_SA2$sens[[1]],
      type='l',panel.first=grid(), lwd=2,col=cols[1],
@@ -808,12 +839,12 @@ stan_dat_final =
        Ntest = ncol(X),
        K_sites = max(site_index_all_studies),
        site = site_index_all_studies,
-       prior_mu = matrix(data = c(-log10(c(300, 250, 75)),
-                                  log10(c(1, 200, 3000))),
+       prior_mu = matrix(data = c(-log10(c(300, 200, 100)),
+                                  log10(c(1, 500, 2500))),
                          nrow = ncol(X),
                          byrow = T),
        prior_mu_sigma = matrix(data = c(.1,.1,.1,
-                                        .1,.1,.1),
+                                        .2,.2,.2),
                                nrow = ncol(X),
                                byrow = T),
        prior_sigma_vals = matrix(data = c(.1,.1,
@@ -839,7 +870,6 @@ print(stan_dat_final$dirichlet_prior_prev)
 ```
 
 Run models:
-
 ```{r, run_mod3}
 fname_final = paste0('Rout/', 'mod3_LC_cor_final.stanfit')
 if(RUN_STAN | !file.exists(fname_final)){
@@ -1301,8 +1331,8 @@ cor.test(model1_probs$P_SM1, dat_Kilifi$P_SM)
 
 Save output
 ```{r}
-# dat_kemri = dat_all[dat_all$study=='Kilifi (Kenya)', ]
-# save(dat_kemri, file = 'kemri_PSM.RData')
+dat_kemri = dat_all[dat_all$study=='Kilifi (Kenya)', ]
+write.csv(dat_kemri, file = 'kemri_PSM.csv')
 ```
 
 

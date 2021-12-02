@@ -18,7 +18,7 @@ output:
 ```
 
 ```
-## This is mgcv 1.8-31. For overview type 'help("mgcv-package")'.
+## This is mgcv 1.8-36. For overview type 'help("mgcv-package")'.
 ```
 
 ```
@@ -37,7 +37,7 @@ output:
 ```
 
 ```
-## Package 'mclust' version 5.4.6
+## Package 'mclust' version 5.4.7
 ## Type 'citation("mclust")' for citing this R package in publications.
 ```
 
@@ -134,9 +134,9 @@ output:
 ```
 
 ```
-## The following object is masked from 'package:mgcv':
+## The following objects are masked from 'package:mgcv':
 ## 
-##     rmvn
+##     dmvn, rmvn
 ```
 
 ```
@@ -149,34 +149,36 @@ output:
 ## LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
 ## 
 ## locale:
-## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+## [1] en_GB.UTF-8/en_GB.UTF-8/en_GB.UTF-8/C/en_GB.UTF-8/en_GB.UTF-8
 ## 
 ## attached base packages:
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] LaplacesDemon_16.1.6 mvtnorm_1.1-1        reshape2_1.4.4      
-##  [4] dplyr_1.0.0          gtools_3.8.2         rstan_2.21.2        
-##  [7] ggplot2_3.3.2        StanHeaders_2.21.0-5 mclust_5.4.6        
-## [10] lme4_1.1-23          Matrix_1.2-18        mgcv_1.8-31         
-## [13] nlme_3.1-148         RColorBrewer_1.1-2  
+##  [1] LaplacesDemon_16.1.6 mvtnorm_1.1-2        reshape2_1.4.4      
+##  [4] dplyr_1.0.7          gtools_3.9.2         rstan_2.21.2        
+##  [7] ggplot2_3.3.5        StanHeaders_2.21.0-7 mclust_5.4.7        
+## [10] lme4_1.1-27.1        Matrix_1.3-4         mgcv_1.8-36         
+## [13] nlme_3.1-153         RColorBrewer_1.1-2  
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] Rcpp_1.0.5.1       lattice_0.20-41    prettyunits_1.1.1  ps_1.3.3          
-##  [5] assertthat_0.2.1   digest_0.6.25      V8_3.2.0           R6_2.4.1          
-##  [9] plyr_1.8.6         stats4_4.0.2       evaluate_0.14      pillar_1.4.6      
-## [13] rlang_0.4.7        curl_4.3           minqa_1.2.4        callr_3.4.3       
-## [17] nloptr_1.2.2.2     rmarkdown_2.3      splines_4.0.2      statmod_1.4.34    
-## [21] stringr_1.4.0      loo_2.3.1          munsell_0.5.0      compiler_4.0.2    
-## [25] xfun_0.15          pkgconfig_2.0.3    pkgbuild_1.1.0     htmltools_0.5.0   
-## [29] tidyselect_1.1.0   tibble_3.0.3       gridExtra_2.3      codetools_0.2-16  
-## [33] matrixStats_0.56.0 fansi_0.4.1        crayon_1.3.4       withr_2.2.0       
-## [37] MASS_7.3-51.6      grid_4.0.2         jsonlite_1.7.0     gtable_0.3.0      
-## [41] lifecycle_0.2.0    magrittr_1.5       scales_1.1.1       RcppParallel_5.0.2
-## [45] cli_2.0.2          stringi_1.4.6      ellipsis_0.3.1     generics_0.0.2    
-## [49] vctrs_0.3.2        boot_1.3-25        tools_4.0.2        glue_1.4.1        
-## [53] purrr_0.3.4        processx_3.4.3     parallel_4.0.2     yaml_2.2.1        
-## [57] inline_0.3.15      colorspace_1.4-1   knitr_1.29
+##  [1] Rcpp_1.0.7         lattice_0.20-44    prettyunits_1.1.1  ps_1.6.0          
+##  [5] assertthat_0.2.1   digest_0.6.27      utf8_1.2.2         V8_3.4.2          
+##  [9] plyr_1.8.6         R6_2.5.1           stats4_4.0.2       evaluate_0.14     
+## [13] pillar_1.6.2       rlang_0.4.11       curl_4.3.2         minqa_1.2.4       
+## [17] rstudioapi_0.13    callr_3.7.0        nloptr_1.2.2.2     jquerylib_0.1.4   
+## [21] rmarkdown_2.11     splines_4.0.2      stringr_1.4.0      loo_2.4.1         
+## [25] munsell_0.5.0      compiler_4.0.2     xfun_0.26          pkgconfig_2.0.3   
+## [29] pkgbuild_1.2.0     htmltools_0.5.2    tidyselect_1.1.1   tibble_3.1.4      
+## [33] gridExtra_2.3      codetools_0.2-18   matrixStats_0.61.0 fansi_0.5.0       
+## [37] crayon_1.4.1       withr_2.4.2        MASS_7.3-54        grid_4.0.2        
+## [41] jsonlite_1.7.2     gtable_0.3.0       lifecycle_1.0.0    DBI_1.1.1         
+## [45] magrittr_2.0.1     scales_1.1.1       RcppParallel_5.1.4 cli_3.0.1         
+## [49] stringi_1.7.4      bslib_0.3.0        ellipsis_0.3.2     generics_0.1.0    
+## [53] vctrs_0.3.8        boot_1.3-28        tools_4.0.2        glue_1.4.2        
+## [57] purrr_0.3.4        parallel_4.0.2     processx_3.5.2     fastmap_1.1.0     
+## [61] yaml_2.2.1         inline_0.3.19      colorspace_2.0-2   knitr_1.34        
+## [65] sass_0.4.0
 ```
 
 
@@ -375,7 +377,7 @@ Correlation between the platelet count and the PfHRP2 concentration
 
 Summary plot of the biomarker data
 
-![](Platelet_PfHRP2_SM_model_files/figure-html/platelet_hrp2_data-1.png)<!-- -->
+![](Platelet_PfHRP2_SM_model_files/figure-html/platelet_hrp2_data-1.png)<!-- -->![](Platelet_PfHRP2_SM_model_files/figure-html/platelet_hrp2_data-2.png)<!-- -->
 
 
 # Basic data exploration: clustering with mclust
@@ -400,14 +402,14 @@ We merge all the data into one and fit mclust
 ## Gaussian finite mixture model fitted by EM algorithm 
 ## ---------------------------------------------------- 
 ## 
-## Mclust VVE (ellipsoidal, equal orientation) model with 3 components: 
+## Mclust VEV (ellipsoidal, equal shape) model with 9 components: 
 ## 
-##  log-likelihood    n df       BIC       ICL
-##       -6826.373 2477 23 -13832.49 -14386.62
+##  log-likelihood    n df      BIC       ICL
+##       -6408.059 2477 73 -13386.6 -15021.76
 ## 
 ## Clustering table:
-##    1    2    3 
-##  910  148 1419
+##   1   2   3   4   5   6   7   8   9 
+## 417  27 459 196 230 433 141 305 269
 ```
 
 ```
@@ -415,63 +417,69 @@ We merge all the data into one and fit mclust
 ## Gaussian finite mixture model fitted by EM algorithm 
 ## ---------------------------------------------------- 
 ## 
-## Mclust VVE (ellipsoidal, equal orientation) model with 4 components: 
+## Mclust VVV (ellipsoidal, varying volume, shape, and orientation) model with 4
+## components: 
 ## 
 ##  log-likelihood    n df       BIC       ICL
-##       -3702.525 2477 20 -7561.347 -8380.208
+##       -3939.675 2622 23 -8060.399 -8886.706
 ## 
 ## Clustering table:
 ##    1    2    3    4 
-##  139  770   80 1488
+##  776   62  182 1602
 ```
 
-![](Platelet_PfHRP2_SM_model_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
+![](Platelet_PfHRP2_SM_model_files/figure-html/mclust-1.png)<!-- -->
 
 ```
 ## ---------------------------------------------------- 
 ## Gaussian finite mixture model fitted by EM algorithm 
 ## ---------------------------------------------------- 
 ## 
-## Mclust VEV (ellipsoidal, equal shape) model with 4 components: 
+## Mclust VVV (ellipsoidal, varying volume, shape, and orientation) model with 2
+## components: 
 ## 
 ##  log-likelihood    n df       BIC       ICL
-##       -5841.928 2477 20 -11840.15 -12924.89
+##       -6667.391 2477 11 -13420.74 -13994.61
 ## 
 ## Clustering table:
-##   1   2   3   4 
-## 898 859 574 146
+##    1    2 
+##  942 1535
 ```
 
-![](Platelet_PfHRP2_SM_model_files/figure-html/unnamed-chunk-5-2.png)<!-- -->
+![](Platelet_PfHRP2_SM_model_files/figure-html/mclust-2.png)<!-- -->
 
 ```
 ## ---------------------------------------------------- 
 ## Gaussian finite mixture model fitted by EM algorithm 
 ## ---------------------------------------------------- 
 ## 
-## Mclust VVE (ellipsoidal, equal orientation) model with 3 components: 
+## Mclust VVV (ellipsoidal, varying volume, shape, and orientation) model with 2
+## components: 
 ## 
-##  log-likelihood    n df       BIC      ICL
-##       -4172.268 2477 15 -8461.758 -9076.87
+##  log-likelihood    n df       BIC       ICL
+##       -4785.857 2477 11 -9657.677 -10326.46
 ## 
 ## Clustering table:
-##    1    2    3 
-##  962  196 1319
+##    1    2 
+## 1148 1329
 ```
 
-![](Platelet_PfHRP2_SM_model_files/figure-html/unnamed-chunk-5-3.png)<!-- -->
+![](Platelet_PfHRP2_SM_model_files/figure-html/mclust-3.png)<!-- -->
 
 ```
 ##                   
 ##                      1   2   3   4
-##   Bangladesh         0  28   3 139
-##   FEAST (Uganda)   136 114  36 139
-##   Kampala (Uganda)   0 154   9 321
-##   Kilifi (Kenya)     3 474  32 889
+##   Bangladesh        24   3   0 144
+##   FEAST (Uganda)   147  26 179 207
+##   Kampala (Uganda) 149   8   0 335
+##   Kilifi (Kenya)   456  25   3 916
 ```
 
 
-In conclusion, the distribution of the parasite count is less easily decomposed than that of the platelet count or HRP2 concentration. The HRP2 and platelet count is the only one where the estimated break is not othorgonal to either variable.
+In conclusion, the distribution of the parasite count is less easily decomposed than that of the platelet count or HRP2 concentration. The HRP2 and platelet count is the only one where the estimated break is not orthogonal to either variable.
+
+
+
 
 # Fitting a mixture model to platelets and HRP2
 ## Two component mixture - not including FEAST
@@ -481,6 +489,8 @@ In conclusion, the distribution of the parasite count is less easily decomposed 
 Analysis not including the FEAST study - only severe malaria studies
 
 We convert the platelet counts and HRP2 measurements to log10 scale. The Platelet counts then get multiplied by minus 1: this is so that increasing values correspond to more likely severe malaria. This is because the underlying stan model uses the *ordered* vector type to avoid label switching problems. 
+
+It was not possible to get reasonable fits from this model when we included the parasite density. This most likely results from model mis-specification. The parasite density has a lower discriminatory value for severe malaria as shown by our exploratory analyses (see github). Parasite density is mechanistically related to the \textit{Pf}HRP2 concentration. Pre-referral treatment with antimalarials (which is common in severe malaria referrals) can reduce the admission parasite density substantially (thus a much larger variance in the biomarker values for the true severe malaria subgroup). For these reasons, the main models only used the platelet counts and \textit{Pf}HRP2 concentrations.
 
 
 ```
@@ -498,9 +508,9 @@ We convert the platelet counts and HRP2 measurements to log10 scale. The Platele
 ```
 
 ```
-##          [,1]      [,2]
-## [1,] -2.39794 -1.875061
-## [2,]  2.30103  3.477121
+##          [,1]     [,2]
+## [1,] -2.30103 -2.00000
+## [2,]  2.69897  3.39794
 ```
 
 ```
@@ -541,7 +551,7 @@ We check convergence with the traceplots
 ```
 
 ```
-## [1] 94 71 65
+## [1] 93 69 64
 ```
 
 ```
@@ -549,7 +559,7 @@ We check convergence with the traceplots
 ```
 
 ```
-## [1] 96 73 66
+## [1] 94 68 59
 ```
 
 ```
@@ -557,7 +567,7 @@ We check convergence with the traceplots
 ```
 
 ```
-## [1] 95 73 65
+## [1] 94 72 64
 ```
 
 ```
@@ -565,7 +575,7 @@ We check convergence with the traceplots
 ```
 
 ```
-## [1] 96 74 67
+## [1] 95 70 63
 ```
 
 ```
@@ -576,23 +586,23 @@ We check convergence with the traceplots
 ## thetas_all
 ##                 
 ##                  not SM   SM
-##   Platelet count    232   71
-##   PfHRP2            193 3392
+##   Platelet count    227   70
+##   PfHRP2            225 3432
 ## thetas_all_cor
 ##                 
 ##                  not SM   SM
-##   Platelet count    221   74
-##   PfHRP2            189 3205
+##   Platelet count    197   71
+##   PfHRP2            303 3300
 ## thetas_all_cor_WP
 ##                 
 ##                  not SM   SM
-##   Platelet count    218   74
-##   PfHRP2            197 3230
+##   Platelet count    214   73
+##   PfHRP2            211 3252
 ## thetas_all_cor_tdist
 ##                 
 ##                  not SM   SM
-##   Platelet count    242   74
-##   PfHRP2            204 3202
+##   Platelet count    225   71
+##   PfHRP2            281 3275
 ```
 
 ```
@@ -602,29 +612,29 @@ We check convergence with the traceplots
 ```
 ##       
 ##             [,1]      [,2]
-##   [1,] 0.2811903 0.7333359
-##   [2,] 0.3053538 0.4456030
+##   [1,] 0.2819436 0.7499934
+##   [2,] 0.3032643 0.4416046
 ```
 
 ```
 ##       
 ##             [,1]      [,2]
-##   [1,] 0.3051498 0.7711259
-##   [2,] 0.3185904 0.4561778
+##   [1,] 0.3170179 0.8449156
+##   [2,] 0.3170527 0.4391073
 ```
 
 ```
 ##       
 ##             [,1]      [,2]
-##   [1,] 0.3070648 0.7758202
-##   [2,] 0.3186704 0.4529417
+##   [1,] 0.3091195 0.7896354
+##   [2,] 0.3182576 0.4512951
 ```
 
 ```
 ##       
 ##             [,1]      [,2]
-##   [1,] 0.2346785 0.7134718
-##   [2,] 0.2905635 0.4305740
+##   [1,] 0.2436313 0.7532043
+##   [2,] 0.2863234 0.4214951
 ```
 
 ```
@@ -632,7 +642,7 @@ We check convergence with the traceplots
 ```
 
 ```
-## [1] 0.1781846
+## [1] 0.3031062
 ```
 
 ```
@@ -640,17 +650,17 @@ We check convergence with the traceplots
 ```
 
 ```
-## [1] 0.2396636
+## [1] 0.2345801
 ```
 
 ![](Platelet_PfHRP2_SM_model_files/figure-html/check_model_fits-5.png)<!-- -->
 
 ```
-## [1] 1303
+## [1] 1077
 ```
 
 ```
-## [1] 404
+## [1] 448
 ```
 
 
@@ -664,9 +674,9 @@ Classifications under the bivariate t-distribution model
 ![](Platelet_PfHRP2_SM_model_files/figure-html/SM_group_classifications_SMonly_tdist-1.png)<!-- -->
 
 
-### Platelet counts in not Severe Malaria
+### Platelet counts in not Severe Malaria and Severe Malaria
 
-![](Platelet_PfHRP2_SM_model_files/figure-html/unnamed-chunk-6-1.png)<!-- -->![](Platelet_PfHRP2_SM_model_files/figure-html/unnamed-chunk-6-2.png)<!-- -->![](Platelet_PfHRP2_SM_model_files/figure-html/unnamed-chunk-6-3.png)<!-- -->![](Platelet_PfHRP2_SM_model_files/figure-html/unnamed-chunk-6-4.png)<!-- -->
+![](Platelet_PfHRP2_SM_model_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 
 
 ### Sensitivity analysis - only African studies
@@ -688,7 +698,7 @@ Run model and check convergence
 ![](Platelet_PfHRP2_SM_model_files/figure-html/fit_stan_model_sensitivityanalysis-1.png)<!-- -->
 
 ```
-## [1] 71 65
+## [1] 65 58
 ```
 
 ```
@@ -698,8 +708,8 @@ Run model and check convergence
 ```
 ##                 
 ##                  not SM   SM
-##   Platelet count    219   77
-##   PfHRP2            197 3385
+##   Platelet count    195   73
+##   PfHRP2            305 3545
 ```
 
 
@@ -709,11 +719,11 @@ Run model and check convergence
 ![](Platelet_PfHRP2_SM_model_files/figure-html/roc_curves_mod2-1.png)<!-- -->
 
 ```
-## Platelet cutoff of 150,000 per uL has a sensitivity of 83% and a specificity of 71%
+## Platelet cutoff of 150,000 per uL has a sensitivity of 85% and a specificity of 65%
 ```
 
 ```
-## PLasma PfHRP2 cutoff of 1000 ng/ml has a sensitivity of 87% and a specificity of 83%
+## PLasma PfHRP2 cutoff of 1000 ng/ml has a sensitivity of 88% and a specificity of 73%
 ```
 
 
@@ -748,9 +758,9 @@ This does not fit when we add parasite counts. So we are only using two biomarke
 ```
 
 ```
-##           [,1]     [,2]      [,3]
-## [1,] -2.477121 -2.39794 -1.875061
-## [2,]  0.000000  2.30103  3.477121
+##           [,1]     [,2]     [,3]
+## [1,] -2.477121 -2.30103 -2.00000
+## [2,]  0.000000  2.69897  3.39794
 ```
 
 ```
@@ -760,7 +770,7 @@ This does not fit when we add parasite counts. So we are only using two biomarke
 ```
 ##      [,1] [,2] [,3]
 ## [1,]  0.1  0.1  0.1
-## [2,]  0.1  0.1  0.1
+## [2,]  0.2  0.2  0.2
 ```
 
 ```
@@ -779,7 +789,6 @@ Run models:
 
 
 
-
 ![](Platelet_PfHRP2_SM_model_files/figure-html/summary_fit3-1.png)<!-- -->
 
 ```
@@ -789,39 +798,39 @@ Run models:
 ```
 ##        
 ##         Bangladesh FEAST (Uganda) Kampala (Uganda) Kilifi (Kenya)
-##   2.5%        91.0           31.4             66.6           61.0
-##   50%         96.1           36.6             73.5           65.9
-##   97.5%       98.8           41.9             79.4           70.2
+##   2.5%        89.9           30.5             65.3           59.2
+##   50%         95.6           35.9             72.5           64.7
+##   97.5%       98.9           41.1             79.2           69.9
 ```
 
 ```
 ##                 
 ##                  not SM not SM   SM
-##   Platelet count    289    208   74
-##   PfHRP2              1    179 3135
+##   Platelet count    286    203   73
+##   PfHRP2              1    197 3164
 ```
 
 ```
-## In SM the 95% pred interval for the platelet count is 17 to 312 with a mean of 74
+## In SM the 95% pred interval for the platelet count is 17 to 308 with a mean of 73
 ```
 
 ```
-## In SM the 95% pred interval for the PfHRP2 concentration is 402 to 24452 with a mean of 3135
+## In SM the 95% pred interval for the PfHRP2 concentration is 414 to 24196 with a mean of 3164
 ```
 
 ```
-## In not SM the 95% pred interval for the platelet count is 51 to 844 with a mean of 208
+## In not SM the 95% pred interval for the platelet count is 50 to 832 with a mean of 203
 ```
 
 ```
-## In not SM the 95% pred interval for the PfHRP2 concentration is 5 to 6376 with a mean of 179
+## In not SM the 95% pred interval for the PfHRP2 concentration is 5 to 7456 with a mean of 197
 ```
 
 
 
 
 Make a P(SM) variable for subsequent analysis (continuous) and a discrete classification based on a cutoff of 0.5
-![](Platelet_PfHRP2_SM_model_files/figure-html/unnamed-chunk-7-1.png)<!-- -->![](Platelet_PfHRP2_SM_model_files/figure-html/unnamed-chunk-7-2.png)<!-- -->
+![](Platelet_PfHRP2_SM_model_files/figure-html/unnamed-chunk-6-1.png)<!-- -->![](Platelet_PfHRP2_SM_model_files/figure-html/unnamed-chunk-6-2.png)<!-- -->
 
 
 
@@ -839,12 +848,12 @@ Relationship with the two main subphenotypes, cerebral malaria and severe malari
 ##   coma            study        SM
 ## 1    0       Bangladesh 0.9841270
 ## 2    1       Bangladesh 0.9722222
-## 3    0   FEAST (Uganda) 0.3423423
-## 4    1   FEAST (Uganda) 0.4495413
-## 5    0 Kampala (Uganda) 0.6578947
-## 6    1 Kampala (Uganda) 0.8863636
-## 7    0   Kilifi (Kenya) 0.7422680
-## 8    1   Kilifi (Kenya) 0.6616162
+## 3    0   FEAST (Uganda) 0.3400901
+## 4    1   FEAST (Uganda) 0.4403670
+## 5    0 Kampala (Uganda) 0.6447368
+## 6    1 Kampala (Uganda) 0.8787879
+## 7    0   Kilifi (Kenya) 0.7353952
+## 8    1   Kilifi (Kenya) 0.6502525
 ```
 
 ```
@@ -856,11 +865,11 @@ Relationship with the two main subphenotypes, cerebral malaria and severe malari
 ## 1   0       Bangladesh 0.9753086
 ## 2   1       Bangladesh 1.0000000
 ## 3   0   FEAST (Uganda) 0.3454106
-## 4   1   FEAST (Uganda) 0.4265734
-## 5   0 Kampala (Uganda) 0.8686441
-## 6   1 Kampala (Uganda) 0.6992188
-## 7   0   Kilifi (Kenya) 0.6567835
-## 8   1   Kilifi (Kenya) 0.8666667
+## 4   1   FEAST (Uganda) 0.4125874
+## 5   0 Kampala (Uganda) 0.8644068
+## 6   1 Kampala (Uganda) 0.6835938
+## 7   0   Kilifi (Kenya) 0.6469003
+## 8   1   Kilifi (Kenya) 0.8596491
 ```
 
 
@@ -879,7 +888,7 @@ Main model fits - three component model
 ## 
 ##       class
 ## sickle   0   1
-##      1 279 187
+##      1 281 185
 ##      2  40   6
 ##      3  20   1
 ## 
@@ -887,7 +896,7 @@ Main model fits - three component model
 ## 
 ##       class
 ## sickle   0   1
-##      1  90 373
+##      1  95 368
 ##      2   1   3
 ##      3  17   6
 ## 
@@ -895,7 +904,7 @@ Main model fits - three component model
 ## 
 ##       class
 ## sickle   0   1
-##      1 386 962
+##      1 399 949
 ##      2  26  15
 ##      3   6   1
 ```
@@ -908,19 +917,19 @@ Main model fits - three component model
 ```
 ## [1] "FEAST (Uganda)"
 ##        1 
-## 16.00333
+## 15.42788
 ```
 
 ```
 ## [1] "Kampala (Uganda)"
 ##        1 
-## 11.72597
+## 11.49091
 ```
 
 ```
 ## [1] "Kilifi (Kenya)"
-##        1 
-## 13.79889
+##       1 
+## 13.7813
 ```
 
 ![](Platelet_PfHRP2_SM_model_files/figure-html/parasite_densities-1.png)<!-- -->
@@ -928,16 +937,16 @@ Main model fits - three component model
 ```
 ## [1] "Bangladesh"
 ##         1 
-## 0.4098848
+## 0.4286614
 ```
 
 ```
 ##                          Estimate Std. Error    t value      Pr(>|t|)
-## (Intercept)            3.80711388 0.09259111 41.1174875 2.295592e-277
-## P_SM                   1.10564132 0.05645907 19.5830606  4.345939e-79
-## studyFEAST (Uganda)   -0.23100536 0.09978384 -2.3150578  2.069762e-02
-## studyKampala (Uganda) -0.09881157 0.08798038 -1.1231092  2.615086e-01
-## studyKilifi (Kenya)    0.06215478 0.08114712  0.7659517  4.437838e-01
+## (Intercept)            3.81224652 0.09267166 41.1371359 1.441362e-277
+## P_SM                   1.10526619 0.05676724 19.4701431  2.892819e-78
+## studyFEAST (Uganda)   -0.22016532 0.10001509 -2.2013209  2.781257e-02
+## studyKampala (Uganda) -0.09041491 0.08812500 -1.0259849  3.050069e-01
+## studyKilifi (Kenya)    0.07153498 0.08133515  0.8795088  3.792176e-01
 ```
 
 ```
@@ -945,7 +954,7 @@ Main model fits - three component model
 ```
 
 ```
-## [1]  9.9 12.8 16.5
+## [1]  9.9 12.7 16.5
 ```
 
 
@@ -960,23 +969,23 @@ Main model fits - three component model
 ## 1  0       Bangladesh 35.00
 ## 2  1       Bangladesh 27.35
 ## 3  0   FEAST (Uganda) 30.00
-## 4  1   FEAST (Uganda) 19.35
-## 5  0 Kampala (Uganda) 11.75
+## 4  1   FEAST (Uganda) 19.65
+## 5  0 Kampala (Uganda) 11.60
 ## 6  1 Kampala (Uganda) 15.50
-## 7  0   Kilifi (Kenya) 28.10
-## 8  1   Kilifi (Kenya) 19.60
+## 7  0   Kilifi (Kenya) 27.90
+## 8  1   Kilifi (Kenya) 19.50
 ```
 
 ```
 ##   SM            study  hct
 ## 1  0       Bangladesh  0.0
 ## 2  1       Bangladesh  4.2
-## 3  0   FEAST (Uganda) 21.8
-## 4  1   FEAST (Uganda) 27.5
-## 5  0 Kampala (Uganda) 71.3
-## 6  1 Kampala (Uganda) 46.6
-## 7  0   Kilifi (Kenya)  9.0
-## 8  1   Kilifi (Kenya) 24.3
+## 3  0   FEAST (Uganda) 22.3
+## 4  1   FEAST (Uganda) 26.7
+## 5  0 Kampala (Uganda) 71.7
+## 6  1 Kampala (Uganda) 46.2
+## 7  0   Kilifi (Kenya)  9.2
+## 8  1   Kilifi (Kenya) 24.5
 ```
 
 ```
@@ -1002,7 +1011,7 @@ Main model fits - three component model
 ![](Platelet_PfHRP2_SM_model_files/figure-html/haematocrits-2.png)<!-- -->
 
 ```
-## [1] 28.7
+## [1] 28.6
 ```
 
 
@@ -1019,20 +1028,20 @@ P(Severe malaria) and mortality
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -0.5077  -0.5077  -0.4956  -0.4684   2.1319  
+## -0.5061  -0.5061  -0.4959  -0.4708   2.1277  
 ## 
 ## Coefficients:
 ##             Estimate Std. Error z value Pr(>|z|)    
-## (Intercept)  -1.9836     0.1713 -11.579   <2e-16 ***
-## P_SM         -0.1807     0.3258  -0.555    0.579    
+## (Intercept)  -1.9906     0.1710 -11.639   <2e-16 ***
+## P_SM         -0.1640     0.3307  -0.496     0.62    
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
 ##     Null deviance: 397.79  on 558  degrees of freedom
-## Residual deviance: 397.47  on 557  degrees of freedom
-## AIC: 401.47
+## Residual deviance: 397.54  on 557  degrees of freedom
+## AIC: 401.54
 ## 
 ## Number of Fisher Scoring iterations: 4
 ```
@@ -1045,22 +1054,22 @@ P(Severe malaria) and mortality
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -0.4628  -0.4492  -0.4034  -0.1959   3.1123  
+## -0.4682  -0.4505  -0.3993  -0.1943   3.1004  
 ## 
 ## Coefficients:
 ##             Estimate Std. Error z value Pr(>|z|)    
-## (Intercept)  -4.9285     0.9532  -5.170 2.34e-07 ***
-## P_SM          2.7503     1.0395   2.646  0.00815 ** 
+## (Intercept)  -4.8814     0.9188  -5.313 1.08e-07 ***
+## P_SM          2.7292     1.0106   2.701  0.00692 ** 
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
 ##     Null deviance: 242.07  on 491  degrees of freedom
-## Residual deviance: 230.16  on 490  degrees of freedom
-## AIC: 234.16
+## Residual deviance: 229.90  on 490  degrees of freedom
+## AIC: 233.9
 ## 
-## Number of Fisher Scoring iterations: 7
+## Number of Fisher Scoring iterations: 6
 ```
 
 ```
@@ -1071,20 +1080,20 @@ P(Severe malaria) and mortality
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -0.5629  -0.5069  -0.4517  -0.4455   2.1765  
+## -0.5620  -0.5086  -0.4520  -0.4446   2.1798  
 ## 
 ## Coefficients:
 ##             Estimate Std. Error z value Pr(>|z|)    
-## (Intercept)  -1.7622     0.1531 -11.509   <2e-16 ***
-## P_SM         -0.5089     0.2115  -2.406   0.0161 *  
+## (Intercept)  -1.7657     0.1518 -11.629   <2e-16 ***
+## P_SM         -0.5136     0.2134  -2.406   0.0161 *  
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
 ##     Null deviance: 974.42  on 1399  degrees of freedom
-## Residual deviance: 968.78  on 1398  degrees of freedom
-## AIC: 972.78
+## Residual deviance: 968.77  on 1398  degrees of freedom
+## AIC: 972.77
 ## 
 ## Number of Fisher Scoring iterations: 4
 ```
@@ -1097,18 +1106,18 @@ P(Severe malaria) and mortality
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -0.8194  -0.8183  -0.8065   1.5842   1.7703  
+## -0.8204  -0.8189  -0.8060   1.5830   1.7791  
 ## 
 ## Coefficients:
 ##             Estimate Std. Error z value Pr(>|z|)
-## (Intercept)   -3.460      2.362  -1.465    0.143
-## P_SM           2.541      2.414   1.053    0.293
+## (Intercept)   -3.224      2.114  -1.525    0.127
+## P_SM           2.308      2.168   1.065    0.287
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
 ##     Null deviance: 199.14  on 170  degrees of freedom
-## Residual deviance: 197.32  on 169  degrees of freedom
-## AIC: 201.32
+## Residual deviance: 197.40  on 169  degrees of freedom
+## AIC: 201.4
 ## 
 ## Number of Fisher Scoring iterations: 5
 ```
@@ -1124,7 +1133,7 @@ Summary of lab values by inferred subgroup
 ## 2  1       Bangladesh 30.0
 ## 3  0   FEAST (Uganda)  1.8
 ## 4  1   FEAST (Uganda)  2.4
-## 5  0 Kampala (Uganda)  3.5
+## 5  0 Kampala (Uganda)  3.4
 ## 6  1 Kampala (Uganda)  3.2
 ## 7  0   Kilifi (Kenya)  2.3
 ## 8  1   Kilifi (Kenya)  2.4
@@ -1136,7 +1145,7 @@ Summary of lab values by inferred subgroup
 ## 2  1       Bangladesh           79433
 ## 3  0   FEAST (Uganda)             251
 ## 4  1   FEAST (Uganda)           39811
-## 5  0 Kampala (Uganda)           10000
+## 5  0 Kampala (Uganda)            7943
 ## 6  1 Kampala (Uganda)           50119
 ## 7  0   Kilifi (Kenya)           10000
 ## 8  1   Kilifi (Kenya)           79433
@@ -1156,23 +1165,23 @@ Summary of lab values by inferred subgroup
 
 ```
 ##   SM            study sickle.1 sickle.2 sickle.3
-## 1  0   FEAST (Uganda)      279       40       20
-## 2  1   FEAST (Uganda)      187        6        1
-## 3  0 Kampala (Uganda)       90        1       17
-## 4  1 Kampala (Uganda)      373        3        6
-## 5  0   Kilifi (Kenya)      386       26        6
-## 6  1   Kilifi (Kenya)      962       15        1
+## 1  0   FEAST (Uganda)      281       40       20
+## 2  1   FEAST (Uganda)      185        6        1
+## 3  0 Kampala (Uganda)       95        1       17
+## 4  1 Kampala (Uganda)      368        3        6
+## 5  0   Kilifi (Kenya)      399       26        6
+## 6  1   Kilifi (Kenya)      949       15        1
 ```
 
 ```
 ##   SM            study outcome
 ## 1  0       Bangladesh     0.0
 ## 2  1       Bangladesh    27.5
-## 3  0   FEAST (Uganda)    12.1
-## 4  1   FEAST (Uganda)    10.3
-## 5  0 Kampala (Uganda)     2.8
-## 6  1 Kampala (Uganda)     7.8
-## 7  0   Kilifi (Kenya)    14.5
+## 3  0   FEAST (Uganda)    12.0
+## 4  1   FEAST (Uganda)    10.4
+## 5  0 Kampala (Uganda)     2.7
+## 6  1 Kampala (Uganda)     7.9
+## 7  0   Kilifi (Kenya)    14.3
 ## 8  1   Kilifi (Kenya)     9.6
 ```
 
@@ -1182,17 +1191,17 @@ Summary of lab values by inferred subgroup
 ![](Platelet_PfHRP2_SM_model_files/figure-html/wbcs-1.png)<!-- -->
 
 ```
-##                           Estimate  Std. Error    t value      Pr(>|t|)
-## (Intercept)            1.285761892 0.045950004  27.981758 6.186292e-151
-## studyFEAST (Uganda)   -0.124187000 0.043797303  -2.835494  4.610666e-03
-## studyKampala (Uganda) -0.136828811 0.042309054  -3.234031  1.235762e-03
-## studyKilifi (Kenya)   -0.068274021 0.042223229  -1.616978  1.060037e-01
-## SM                    -0.113334922 0.011288100 -10.040213  2.666745e-23
-## age                   -0.006786252 0.001189921  -5.703113  1.308529e-08
+##                           Estimate Std. Error    t value      Pr(>|t|)
+## (Intercept)            1.286060464 0.04589606  28.021151 2.645131e-151
+## studyFEAST (Uganda)   -0.124664570 0.04376642  -2.848407  4.428221e-03
+## studyKampala (Uganda) -0.137776566 0.04229067  -3.257848  1.136974e-03
+## studyKilifi (Kenya)   -0.069168701 0.04220474  -1.638885  1.013576e-01
+## SM                    -0.114044930 0.01120286 -10.179985  6.756193e-24
+## age                   -0.006774506 0.00118929  -5.696263  1.361504e-08
 ```
 
 ```
-## [1] 1.29818
+## [1] 1.300304
 ```
 
 ```
@@ -1209,22 +1218,22 @@ Summary of lab values by inferred subgroup
 ## 
 ## Parametric coefficients:
 ##                       Estimate Std. Error z value Pr(>|z|)    
-## (Intercept)            1.99471    0.46831   4.259 2.05e-05 ***
-## studyFEAST (Uganda)   -2.73510    0.51201  -5.342 9.20e-08 ***
-## studyKampala (Uganda) -2.69471    0.48936  -5.507 3.66e-08 ***
-## studyKilifi (Kenya)   -2.34451    0.49693  -4.718 2.38e-06 ***
-## SM                    -0.68358    0.09872  -6.924 4.38e-12 ***
+## (Intercept)            2.02403    0.46847   4.320 1.56e-05 ***
+## studyFEAST (Uganda)   -2.75440    0.51248  -5.375 7.68e-08 ***
+## studyKampala (Uganda) -2.71246    0.48982  -5.538 3.07e-08 ***
+## studyKilifi (Kenya)   -2.36279    0.49738  -4.751 2.03e-06 ***
+## SM                    -0.71074    0.09796  -7.256 3.99e-13 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
 ## Approximate significance of smooth terms:
-##          edf Ref.df Chi.sq  p-value    
-## s(age) 1.976  1.999  70.64 6.91e-16 ***
+##          edf Ref.df Chi.sq p-value    
+## s(age) 1.976  1.999  70.62  <2e-16 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
-## R-sq.(adj) =  0.0756   Deviance explained = 6.22%
-## UBRE = 0.19047  Scale est. = 1         n = 2393
+## R-sq.(adj) =  0.0775   Deviance explained = 6.37%
+## UBRE = 0.18848  Scale est. = 1         n = 2393
 ```
 
 ```
@@ -1232,7 +1241,7 @@ Summary of lab values by inferred subgroup
 ```
 
 ```
-## [1] 0.46 0.50 0.56
+## [1] 0.45 0.49 0.54
 ```
 
 ```
@@ -1266,8 +1275,8 @@ We also look at whether WBC values predict positive blood culture
 ## 
 ##    
 ##       0   1
-##   0 272  38
-##   1 166  19
+##   0 273  39
+##   1 165  18
 ## 
 ## , ,  = Kampala (Uganda)
 ## 
@@ -1280,8 +1289,8 @@ We also look at whether WBC values predict positive blood culture
 ## 
 ##    
 ##       0   1
-##   0 394  28
-##   1 955  23
+##   0 406  29
+##   1 943  22
 ```
 
 ```
@@ -1330,36 +1339,36 @@ We also look at whether WBC values predict positive blood culture
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -0.6180  -0.3508  -0.2313  -0.2313   2.6961  
+## -0.6240  -0.3544  -0.2269  -0.2269   2.7102  
 ## 
 ## Coefficients:
 ##                     Estimate Std. Error z value Pr(>|z|)    
-## (Intercept)          -1.5586     0.2091  -7.454 9.04e-14 ***
-## SM                   -0.8502     0.2252  -3.776  0.00016 ***
-## studyKilifi (Kenya)  -1.1988     0.2316  -5.176 2.26e-07 ***
+## (Intercept)          -1.5375     0.2074  -7.415 1.22e-13 ***
+## SM                   -0.9108     0.2257  -4.036 5.44e-05 ***
+## studyKilifi (Kenya)  -1.1986     0.2318  -5.171 2.32e-07 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
 ##     Null deviance: 680.62  on 1697  degrees of freedom
-## Residual deviance: 639.56  on 1695  degrees of freedom
+## Residual deviance: 637.41  on 1695  degrees of freedom
 ##   (697 observations deleted due to missingness)
-## AIC: 645.56
+## AIC: 643.41
 ## 
 ## Number of Fisher Scoring iterations: 6
 ```
 
 ```
 ##               Estimate Std. Error   z value     Pr(>|z|)
-## (Intercept) -1.7414976  0.2629312 -6.623397 3.510361e-11
-## SM          -0.4801184  0.3615242 -1.328039 1.841651e-01
+## (Intercept) -1.6945957  0.2564364 -6.608249 3.888921e-11
+## SM          -0.5781364  0.3614468 -1.599506 1.097081e-01
 ```
 
 ```
 ##              Estimate Std. Error    z value     Pr(>|z|)
-## (Intercept) -2.644146  0.1955821 -13.519368 1.202036e-41
-## SM          -1.082071  0.2877085  -3.760997 1.692375e-04
+## (Intercept) -2.639057  0.1922129 -13.729863 6.726034e-43
+## SM          -1.118966  0.2888922  -3.873301 1.073710e-04
 ```
 
 ```
@@ -1367,7 +1376,7 @@ We also look at whether WBC values predict positive blood culture
 ```
 
 ```
-## [1] 0.27 0.43 0.66
+## [1] 0.26 0.40 0.63
 ```
 
 ```
@@ -1409,22 +1418,22 @@ We also look at whether WBC values predict positive blood culture
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -1.8159  -1.0113   0.6535   0.8221   1.9815  
+## -1.7857  -1.0038   0.6737   0.8384   1.9731  
 ## 
 ## Coefficients:
 ##                       Estimate Std. Error z value Pr(>|z|)    
-## (Intercept)           -0.40420    0.09306  -4.344 1.40e-05 ***
-## sickle                -1.40772    0.25324  -5.559 2.72e-08 ***
-## studyKampala (Uganda)  1.83944    0.14935  12.317  < 2e-16 ***
-## studyKilifi (Kenya)    1.31551    0.10969  11.993  < 2e-16 ***
+## (Intercept)           -0.42308    0.09322  -4.539 5.66e-06 ***
+## sickle                -1.36948    0.25277  -5.418 6.03e-08 ***
+## studyKampala (Uganda)  1.79061    0.14762  12.130  < 2e-16 ***
+## studyKilifi (Kenya)    1.28798    0.10953  11.759  < 2e-16 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
-##     Null deviance: 3057.8  on 2367  degrees of freedom
-## Residual deviance: 2793.4  on 2364  degrees of freedom
-## AIC: 2801.4
+##     Null deviance: 3082.3  on 2367  degrees of freedom
+## Residual deviance: 2828.8  on 2364  degrees of freedom
+## AIC: 2836.8
 ## 
 ## Number of Fisher Scoring iterations: 4
 ```
@@ -1434,16 +1443,16 @@ We also look at whether WBC values predict positive blood culture
 ```
 
 ```
-## [1] 0.15 0.24 0.40
+## [1] 0.15 0.25 0.42
 ```
 
 ```
 ## [1] "Kilifi (Kenya)"
-## [1] 0.12 0.23 0.44
+## [1] 0.13 0.24 0.46
 ## [1] "Kampala (Uganda)"
-## [1] 0.07 0.72 7.04
+## [1] 0.08 0.77 7.53
 ## [1] "FEAST (Uganda)"
-## [1] 0.09 0.22 0.54
+## [1] 0.09 0.23 0.55
 ```
 
 ```
@@ -1458,22 +1467,22 @@ We also look at whether WBC values predict positive blood culture
 ## 
 ##    
 ##       1   2   3
-##   0 279  40  20
-##   1 187   6   1
+##   0 281  40  20
+##   1 185   6   1
 ## 
 ## , ,  = Kampala (Uganda)
 ## 
 ##    
 ##       1   2   3
-##   0  90   1  17
-##   1 373   3   6
+##   0  95   1  17
+##   1 368   3   6
 ## 
 ## , ,  = Kilifi (Kenya)
 ## 
 ##    
 ##       1   2   3
-##   0 386  26   6
-##   1 962  15   1
+##   0 399  26   6
+##   1 949  15   1
 ```
 
 ```
@@ -1484,22 +1493,22 @@ We also look at whether WBC values predict positive blood culture
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -1.8114  -1.0126   0.6565   0.8216   2.4391  
+## -1.7815  -1.0054   0.6765   0.8380   2.4244  
 ## 
 ## Coefficients:
 ##                       Estimate Std. Error z value Pr(>|z|)    
-## (Intercept)           -0.40075    0.09416  -4.256 2.08e-05 ***
-## sickle                -2.52134    0.40647  -6.203 5.54e-10 ***
-## studyKampala (Uganda)  1.82583    0.14921  12.237  < 2e-16 ***
-## studyKilifi (Kenya)    1.31332    0.11169  11.759  < 2e-16 ***
+## (Intercept)           -0.41900    0.09432  -4.442 8.90e-06 ***
+## sickle                -2.46542    0.40554  -6.079 1.21e-09 ***
+## studyKampala (Uganda)  1.77702    0.14754  12.045  < 2e-16 ***
+## studyKilifi (Kenya)    1.28482    0.11151  11.522  < 2e-16 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
-##     Null deviance: 2993.2  on 2327  degrees of freedom
-## Residual deviance: 2738.5  on 2324  degrees of freedom
-## AIC: 2746.5
+##     Null deviance: 3018.5  on 2327  degrees of freedom
+## Residual deviance: 2773.9  on 2324  degrees of freedom
+## AIC: 2781.9
 ## 
 ## Number of Fisher Scoring iterations: 4
 ```
@@ -1509,16 +1518,16 @@ We also look at whether WBC values predict positive blood culture
 ```
 
 ```
-## [1] 0.04 0.08 0.18
+## [1] 0.04 0.08 0.19
 ```
 
 ```
 ## [1] "Kilifi (Kenya)"
-## [1] 0.01 0.07 0.56
+## [1] 0.01 0.07 0.58
 ## [1] "Kampala (Uganda)"
-## [1] 0.03 0.09 0.22
+## [1] 0.03 0.09 0.24
 ## [1] "FEAST (Uganda)"
-## [1] 0.01 0.07 0.56
+## [1] 0.01 0.08 0.57
 ```
 
 ```
@@ -1529,23 +1538,23 @@ We also look at whether WBC values predict positive blood culture
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -1.8196  -1.0098   0.6511   0.8232   2.4893  
+## -1.7894  -1.0023   0.6713   0.8394   2.4717  
 ## 
 ## Coefficients:
 ##                       Estimate Std. Error z value Pr(>|z|)    
-## (Intercept)             0.9142     0.1953   4.681 2.85e-06 ***
-## sickle                 -1.3221     0.1618  -8.169 3.10e-16 ***
-## studyKampala (Uganda)   1.8513     0.1468  12.608  < 2e-16 ***
-## studyKilifi (Kenya)     1.3161     0.1093  12.047  < 2e-16 ***
+## (Intercept)             0.8628     0.1951   4.423 9.72e-06 ***
+## sickle                 -1.2897     0.1613  -7.994 1.31e-15 ***
+## studyKampala (Uganda)   1.8025     0.1452  12.416  < 2e-16 ***
+## studyKilifi (Kenya)     1.2889     0.1091  11.816  < 2e-16 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
-##     Null deviance: 3154.5  on 2418  degrees of freedom
-## Residual deviance: 2833.8  on 2415  degrees of freedom
+##     Null deviance: 3177.2  on 2418  degrees of freedom
+## Residual deviance: 2869.2  on 2415  degrees of freedom
 ##   (203 observations deleted due to missingness)
-## AIC: 2841.8
+## AIC: 2877.2
 ## 
 ## Number of Fisher Scoring iterations: 4
 ```
@@ -1555,7 +1564,7 @@ We also look at whether WBC values predict positive blood culture
 ```
 
 ```
-## [1] 0.19 0.27 0.37
+## [1] 0.20 0.28 0.38
 ```
 
 
@@ -1570,13 +1579,13 @@ We also look at whether WBC values predict positive blood culture
 ## 	Pearson's product-moment correlation
 ## 
 ## data:  model1_probs$P_SM1 and dat_Kilifi$P_SM
-## t = 30.881, df = 1398, p-value < 2.2e-16
+## t = 31.253, df = 1398, p-value < 2.2e-16
 ## alternative hypothesis: true correlation is not equal to 0
 ## 95 percent confidence interval:
-##  0.6045865 0.6669458
+##  0.6094134 0.6711674
 ## sample estimates:
 ##       cor 
-## 0.6368064
+## 0.6413278
 ```
 
 
@@ -1597,24 +1606,24 @@ Save output
 Plot results
 
 ```
-## [1]  1.93 31.00
+## [1]  5.18 40.44
 ```
 
 ```
-## [1] 47.76 91.27
+## [1] 50.11 92.21
 ```
 
 ```
-## [1] 82 97
+## [1] 77 94
 ```
 
 ```
-## There are 5073 combinations that have a true positive rate greater than 75 and a false positive rate less than 10
+## There are 0 combinations that have a true positive rate greater than 75 and a false positive rate less than 10
 ```
 
 ```
-##       plt_thresh hrp2_thresh  x1_trans x2_trans   TP   FP ProbSM
-## 18231        150        1000 -2.176091        3 73.6 6.69     94
+##       plt_thresh hrp2_thresh  x1_trans x2_trans    TP    FP ProbSM
+## 18231        150        1000 -2.176091        3 75.96 13.43     89
 ```
 
 ![](Platelet_PfHRP2_SM_model_files/figure-html/optimal_combination-1.png)<!-- -->
@@ -1635,18 +1644,18 @@ Slightly random: predict SM status using HRP2 and HCT
 ## 
 ## Parametric coefficients:
 ##             Estimate Std. Error z value Pr(>|z|)
-## (Intercept)    1.409     11.738    0.12    0.904
+## (Intercept)   -1.010      6.051  -0.167    0.867
 ## 
 ## Approximate significance of smooth terms:
 ##                      edf Ref.df Chi.sq  p-value    
-## s(hct)             1.941  1.997  15.70 0.000329 ***
-## s(log10(hrp2 + 1)) 1.763  1.944 243.49  < 2e-16 ***
-## s(log10_parasites) 1.678  1.896  16.71 0.000124 ***
-## s(study)           2.997  3.000  49.06 8.53e-11 ***
+## s(hct)             1.949  1.997  16.70 0.000224 ***
+## s(log10(hrp2 + 1)) 1.978  1.999 290.23  < 2e-16 ***
+## s(log10_parasites) 1.747  1.936  16.64 0.000142 ***
+## s(study)           2.979  3.000  47.87  < 2e-16 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
-## R-sq.(adj) =  0.867   Deviance explained = 83.8%
-## UBRE = -0.78813  Scale est. = 1         n = 2474
+## R-sq.(adj) =  0.864   Deviance explained = 83.1%
+## UBRE = -0.77747  Scale est. = 1         n = 2474
 ```
 
